@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="hide-zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="pageTitle"></title>
+
+  <!-- ========== Dynamic Favicon (يُحدَّث من lesson.js تلقائياً) ========== -->
+  <link id="dynamicFavicon" rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <link id="dynamicAppleIcon" rel="apple-touch-icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+
+  <!-- ========== Theme Color (شريط المتصفح في الموبايل) ========== -->
+  <meta name="theme-color" content="#0E7C7B" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f0c29" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- ========== Open Graph / Social Sharing ========== -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="ogTitle" content="">
+  <meta property="og:description" id="ogDescription" content="درس تفاعلي لتعلم اللغة العربية · 阿拉伯语互动课程">
+  <meta property="og:locale" content="ar_AR">
+  <meta property="og:locale:alternate" content="zh_CN">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="twitterTitle" content="">
+  <meta name="twitter:description" content="درس تفاعلي لتعلم اللغة العربية · 阿拉伯语互动课程">
+  <meta name="description" content="درس تفاعلي لتعلم اللغة العربية للناطقين بالصينية · 面向中文学习者的阿拉伯语互动课程">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/activities.css">
+  <!-- Premium Educational Design System: load last to bridge legacy styles -->
+  <link rel="stylesheet" href="css/design-tokens.css">
+</head>
+
+<body>
+
+  <!-- ================= SPLASH SCREEN ================= -->
+  <div id="splashScreen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-icon" id="splashIcon">📚</div>
+      <div class="splash-title" id="splashTitle">جَارِ التَّحْمِيل...</div>
+      <div class="splash-subtitle" id="splashSubtitle">加载中...</div>
+      <div class="splash-loader">
+        <div class="splash-loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FIXED TOP BAR ================= -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-logo" id="brandIcon"></div>
+        <div class="brand-title">
+          <span id="brandPrefix"></span>
+          <span id="brandTitle"></span>
+        </div>
+      </div>
+
+      <div class="current-section-title" id="currentSectionTitle" style="display: none;">🎬 المُقَدِّمَة</div>
+
+      <div id="mobileCenter"
+        style="display:none;flex:1;justify-content:center;align-items:center;gap:5px;font-weight:700;color:var(--primary);font-size:15px;">
+        <span id="tbIcon">🎬</span>
+        <span id="tbName">المُقَدِّمَة</span>
+      </div>
+
+      <div class="stepper-desktop" id="stepperDesktop">
+        <div class="step-item current" role="button" tabindex="0" onclick="goToStage(0)"
+          aria-label="المُقَدِّمَة - المرحلة 1 من 9">
+          <div class="step-dot">🎬</div>
+          <div class="step-name">المُقَدِّمَة</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(1)"
+          aria-label="تَفْكِير - المرحلة 2 من 9">
+          <div class="step-dot">💡</div>
+          <div class="step-name">تَفْكِير</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(2)"
+          aria-label="مُفْرَدَات - المرحلة 3 من 9">
+          <div class="step-dot">📚</div>
+          <div class="step-name">مُفْرَدَات</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(3)"
+          aria-label="القِرَاءَة - المرحلة 4 من 9">
+          <div class="step-dot">📖</div>
+          <div class="step-name">القِرَاءَة</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(4)"
+          aria-label="الشَّرْح - المرحلة 5 من 9">
+          <div class="step-dot">🔍</div>
+          <div class="step-name">الشَّرْح</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(5)"
+          aria-label="قَوَاعِد - المرحلة 6 من 9">
+          <div class="step-dot">🔤</div>
+          <div class="step-name">قَوَاعِد</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(6)"
+          aria-label="تَدْرِيبَات - المرحلة 7 من 9">
+          <div class="step-dot">✏️</div>
+          <div class="step-name">تَدْرِيبَات</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(7)"
+          aria-label="مُحَادَثَة - المرحلة 8 من 9">
+          <div class="step-dot">🗣️</div>
+          <div class="step-name">مُحَادَثَة</div>
+        </div>
+        <div class="step-line"></div>
+        <div class="step-item upcoming" role="button" tabindex="0" onclick="goToStage(8)"
+          aria-label="المُرَاجَعَة - المرحلة 9 من 9">
+          <div class="step-dot">🧠</div>
+          <div class="step-name">المُرَاجَعَة</div>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <button class="settings-btn" id="openSettingsBtn" aria-label="فتح الإعدادات"
+          onclick="window.openSettingsModal()">⚙️</button>
+        <!-- يبقى الزر مرئياً فوراً، لكن مركز الأنشطة نفسه يُحمّل عند أول طلب فقط. -->
+        <div class="ds-group">
+          <button id="act-trigger-btn" class="ds-btn" type="button"
+            aria-label="الأنشطة التفاعلية" title="الأنشطة التفاعلية"
+            onclick="ActivityCenterLoader.open(this)">🎮</button>
+        </div>
+        <div class="desktop-settings">
+
+          <div class="ds-group">
+            <button id="translateToggleBtn" class="ds-btn" onclick="TranslationSystem.toggle()">🌐</button>
+          </div>
+
+          <div class="ds-group">
+            <button id="autoFocusToggleBtn" class="ds-btn af-btn" onclick="AutoFocus.toggleEnabled()"
+              aria-label="تَفْعِيل/إِلْغَاء التَّرْكِيز التِّلْقَائِيّ"
+              title="التَّرْكِيز التِّلْقَائِيّ · 自动专注">🎯</button>
+          </div>
+
+          <div class="ds-group">
+            <button class="ds-btn" onclick="changeFont('ar',2)">+</button>
+            <span class="ds-label">ع</span>
+            <button class="ds-btn" onclick="changeFont('ar',-2)">−</button>
+          </div>
+
+          <div class="ds-group">
+            <button class="ds-btn" onclick="changeFont('zh',2)">+</button>
+            <span class="ds-label">中</span>
+            <button class="ds-btn" onclick="changeFont('zh',-2)">−</button>
+          </div>
+
+          <div class="ds-group">
+            <button id="themeToggleBtn" class="ds-btn" onclick="ThemeSystem.toggle()">🌙</button>
+          </div>
+
+          <div class="ds-group">
+            <button id="teacherToolsBtn" class="ds-btn tt-topbar-btn" onclick="TeacherTools.togglePanel()"
+              aria-label="أَدَوَات المُعَلِّم · 教师工具" title="أَدَوَات المُعَلِّم · 教师工具">🎓</button>
+            <span class="answers-hidden-badge" id="answersHiddenBadge" title="الإِجَابَات مُخْفَاة · 答案已隐藏">🙈</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div id="tbDots" style="display:none;justify-content:center;gap:7px;padding:3px 0 5px;width:100%;"></div>
+  </header>
+
+  <div class="stepper-wrap" id="stepperWrap" role="navigation" aria-label="مراحل الدرس · 课程阶段" style="display: none;">
+
+    <div class="stepper-mobile" id="stepperMobile">
+      <div class="stepper-mobile-main">
+        <button class="step-arrow step-arrow-prev" id="mobilePrevBtn" onclick="goToStage(currentStageIndex - 1)"
+          aria-label="المرحلة السابقة">←</button>
+        <div class="mobile-stage-info">
+          <span class="mobile-stage-icon" id="mobileStageIcon">🎬</span>
+          <span class="mobile-stage-name" id="mobileStageName">المُقَدِّمَة</span>
+        </div>
+        <button class="step-arrow step-arrow-next" id="mobileNextBtn" onclick="goToStage(currentStageIndex + 1)"
+          aria-label="المرحلة التالية">→</button>
+      </div>
+      <div class="mobile-stage-dots" id="mobileDotsContainer">
+        <div class="mobile-dot current" role="button" tabindex="0" onclick="goToStage(0)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(1)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(2)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(3)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(4)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(5)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(6)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(7)"></div>
+        <div class="mobile-dot" role="button" tabindex="0" onclick="goToStage(8)"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <main>
+
+    <!-- ========== 1. HOOK ========== -->
+    <section class="section" id="hook" data-stage-name="المُقَدِّمَة" data-stage-icon="🎬">
+      <div class="hero">
+        <div class="hero-emojis" id="hookEmojis"></div>
+        <h1 class="ar-text" id="hookTitle" style="font-size:48px;color:#fff"></h1>
+        <p class="hero-sub" id="hookSubtitle" dir="ltr"></p>
+        <div class="hero-tagline" id="hookTagline"></div>
+      </div>
+
+      <div class="compare-grid" id="compareGrid"></div>
+    </section>
+
+    <!-- ========== 2. THINKING QUESTIONS ========== -->
+    <section class="section" id="thinking" data-stage-name="تَفْكِير" data-stage-icon="💡">
+      <div class="section-header">
+        <div class="section-icon">💡</div>
+        <div>
+          <div class="section-title">أَسْئِلَة التَّفْكِير</div>
+          <div class="section-subtitle">预读思考问题</div>
+        </div>
+      </div>
+
+      <div class="q-grid" id="thinkingGrid"></div>
+      </div>
+    </section>
+
+    <!-- ========== 5. VOCABULARY ========== -->
+    <section class="section" id="vocab" data-stage-name="مُفْرَدَات" data-stage-icon="📚">
+      <div class="section-header">
+        <div class="section-icon">📚</div>
+        <div>
+          <div class="section-title">المُفْرَدَات</div>
+          <div class="section-subtitle">词汇 — 点击卡片显示翻译</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <!-- ================= GLOBAL VOCAB AUDIO PLAYER (isolated) ================= -->
+        <div id="vocabAudioPlayer" dir="rtl" role="region" aria-label="مُشَغِّل المُفْرَدَات">
+          <div class="vap-top">
+            <div class="vap-controls">
+              <button type="button" class="vap-btn vap-btn-play" id="vapPlayBtn" aria-label="تشغيل"></button>
+              <button type="button" class="vap-btn vap-btn-stop" id="vapStopBtn" aria-label="إيقاف">
+                <svg viewBox="0 0 24 24">
+                  <path d="M3 9v6h4l5 5V4L7 9H3z"></path>
+                </svg>
+              </button>
+            </div>
+            <div class="vap-meta">
+              <div class="vap-title">
+                <span class="vap-title-ar">المُفْرَدَات</span>
+                <span class="vap-title-zh">词汇播放</span>
+              </div>
+              <div class="vap-counter">
+                <span id="vapCurIdx">0</span><span class="vap-sep">/</span><span id="vapTotal">0</span>
+              </div>
+            </div>
+          </div>
+          <div class="vap-bottom">
+            <span class="vap-time" id="vapCurTime">0:00</span>
+            <input type="range" class="vap-slider" id="vapSlider" min="0" max="0" step="1" value="0"
+              aria-label="تقدم التشغيل">
+            <span class="vap-time vap-time-total" id="vapTotalTime">0:00</span>
+          </div>
+        </div>
+        <!-- ================= /GLOBAL VOCAB AUDIO PLAYER ================= -->
+
+        <button class="btn btn-primary reveal-all-btn" onclick="revealAllVocab()">🔓 كَشْف الكُلّ <span class="zh-only">· 显示全部</span></button>
+        <div class="vocab-grid" id="vocabGrid">
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 3. READING ========== -->
+    <section class="section" id="reading" data-stage-name="القِرَاءَة" data-stage-icon="📖">
+      <div class="section-header">
+        <div class="section-icon">📖</div>
+        <div>
+          <div class="section-title">الحِوار الأَوَّل — اُنْظُرْ وَاسْتَمِعْ وَأَعِدْ</div>
+          <div class="section-subtitle">第一对话 · 看 · 听 · 重复</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="reveal-sticky">
+          <div class="reveal-btns">
+            <button class="btn btn-primary" onclick="revealAllDialogue()">🔓 كَشْف الكُلّ</button>
+            <button class="btn btn-ghost" onclick="resetDialogue()">🔄 إِعَادَة</button>
+            <button class="btn btn-ghost" onclick="revealNextLine()">➡️ السَّطْر التَّالِي</button>
+            <button class="btn btn-ghost" id="playDialogueBtn" onclick="playRevealedDialogue()">🔊 استمع</button>
+          </div>
+        </div>
+
+        <div class="dialogue-container" style="margin-top:20px">
+          <div id="dialogueScenesContainer">
+          </div>
+
+          <div class="dialogue-box" id="dialogueBox">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 4. DEEP EXPLANATION ========== -->
+    <section class="section" id="explain" data-stage-name="الشَّرْح" data-stage-icon="🔍">
+      <div class="section-header">
+        <div class="section-icon">🔍</div>
+        <div>
+          <div class="section-title">شَرْح تَفْصِيلِيّ</div>
+          <div class="section-subtitle">逐句详细讲解</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="explainContainer"></div>
+      </div>
+    </section>
+
+
+    <!-- ========== 6. GRAMMAR ========== -->
+    <section class="section" id="grammar" data-stage-name="قَوَاعِد" data-stage-icon="🔤">
+      <div class="section-header">
+        <div class="section-icon">🔤</div>
+        <div>
+          <div class="section-title" id="grammarTitle"></div>
+          <div class="section-subtitle" id="grammarSubtitle"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div id="grammarContainer"></div>
+      </div>
+    </section>
+
+    <!-- ========== 7. EXERCISES (MASSIVE) ========== -->
+    <section class="section" id="exercises" data-stage-name="تَدْرِيبَات" data-stage-icon="✏️">
+      <div class="section-header">
+        <div class="section-icon">✏️</div>
+        <div>
+          <div class="section-title" id="exercisesTitle"></div>
+          <div class="section-subtitle" id="exercisesSubtitle"></div>
+        </div>
+      </div>
+      <div id="exercisesContainer"></div>
+    </section>
+
+    <!-- ========== 8. SPEAKING ========== -->
+    <section class="section" id="speaking" data-stage-name="مُحَادَثَة" data-stage-icon="🗣️">
+      <div class="section-header">
+        <div class="section-icon">🗣️</div>
+        <div>
+          <div class="section-title">المُحَادَثَة · ٣ مُسْتَوَيَات</div>
+          <div class="section-subtitle">口语练习 — 3个级别</div>
+        </div>
+      </div>
+
+      <div id="speakingContainer"></div>
+
+    </section>
+
+    <!-- ========== 9. REVIEW ========== -->
+    <section class="section" id="review" data-stage-name="المُرَاجَعَة" data-stage-icon="🧠">
+      <div class="section-header">
+        <div class="section-icon">🧠</div>
+        <div>
+          <div class="section-title">المُرَاجَعَة وَالنَّتِيجَة</div>
+          <div class="section-subtitle">复习与得分</div>
+        </div>
+      </div>
+
+      <div class="score-hero">
+        <div class="score-circle" id="scoreCircle">٠</div>
+        <div class="stars" id="starsDisplay">☆☆☆☆☆</div>
+        <h2 id="scoreTitle">!اِبْدَأْ</h2>
+        <p id="scoreMsg">اِحْسُبْ نَتِيجَتَكَ <span class="zh-only">· 计算你的分数</span></p>
+        <button class="btn" style="background:#fff;color:var(--primary);margin-top:20px" onclick="calcScore()">🎯
+          اِحْسُبْ نَتِيجَتِي <span class="zh-only">· 计算分数</span></button>
+      </div>
+
+      <div class="card" style="margin-top:24px">
+        <h3 style="margin-bottom:14px;font-size:22px;font-family:'Noto Sans Arabic',sans-serif">💭 تَأَمُّل <span class="zh-only">· 反思</span></h3>
+        <div style="display:grid;gap:12px">
+          <div class="q-card" style="cursor:default">
+            <span class="q-emoji">✅</span>
+            <div class="ar-text" style="font-size:20px">مَاذَا تَعَلَّمْتَ اليَوْم؟</div>
+            <div class="zh-text">你今天学到了什么？</div>
+            <textarea
+              style="width:100%;margin-top:10px;padding:12px;border-radius:10px;border:2px solid rgba(14,124,123,.2);background:transparent;color:var(--text);font-family:'Noto Sans Arabic','Noto Sans SC',sans-serif;font-size:16px"
+              rows="2" placeholder="اُكْتُبْ هُنَا... · 在这里写..."></textarea>
+          </div>
+          <div class="q-card" style="cursor:default">
+            <span class="q-emoji">⭐</span>
+            <div class="ar-text" style="font-size:20px">أَيّ تَمْرِين كَانَ الأَمْتَع؟</div>
+            <div class="zh-text">哪个练习最有趣？</div>
+          </div>
+          <div class="q-card" style="cursor:default">
+            <span class="q-emoji">🎯</span>
+            <div class="ar-text" style="font-size:20px">مَاذَا سَتَتَدَرَّبُ عَلَيْهِ تَالِياً؟</div>
+            <div class="zh-text">接下来你会练习什么？</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card"
+        style="margin-top:24px;text-align:center;background:linear-gradient(135deg,#0E7C7B,#0D2B55);color:#fff">
+        <div style="font-size:60px">🎉</div>
+        <h2 class="ar-text" style="font-size:32px;margin:10px 0;color:#fff">!أَحْسَنْتَ</h2>
+        <p class="zh-text show" style="color:rgba(255,255,255,.9);font-size:20px">做得好！你已经完成了这节课。继续学习阿拉伯语吧！</p>
+        <p class="ar-text" style="margin-top:6px;opacity:.95;font-size:18px;color:#fff">لَقَدْ أَكْمَلْتَ الدَّرْسَ
+          . اِستَمِرَّ فِي تَعَلُّم اللُّغَة العَرَبِيَّة!</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" style="display:none; position:fixed; 
+    top:0; left:0; width:100%; height:100%; z-index:999999; 
+    background:rgba(0,0,0,0.5); justify-content:center; 
+    align-items:center;" onclick="if(event.target===this)closeSettingsModal()">
+
+    <div style="background:#fff; border-radius:16px; width:90%; 
+      max-width:380px; max-height:85vh; overflow-y:auto; 
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);" id="settingsModalContent">
+
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; 
+        align-items:center; padding:20px 24px; 
+        border-bottom:1px solid #eee; position:sticky; top:0; 
+        background:#fff; z-index:1;">
+        <div>
+          <div class="settings-main-title" style="font-size:20px; font-weight:700; 
+            color:#1a1a2e;">⚙️ الإعدادات</div>
+          <div class="settings-sub" style="font-size:12px; color:#888;">设置</div>
+        </div>
+        <button onclick="closeSettingsModal()" style="width:36px; height:36px; border-radius:50%; 
+          border:none; background:rgba(14,124,123,0.1); 
+          color:#0E7C7B; font-size:18px; cursor:pointer;">✕</button>
+      </div>
+
+      <!-- Content -->
+      <div style="padding:16px 20px;">
+
+        <!-- Display Section -->
+        <div style="margin-bottom:24px; padding-bottom:16px; 
+          border-bottom:1px solid #f0f0f0;">
+          <h3 style="font-size:14px; font-weight:600; 
+            color:#0E7C7B; margin:0 0 12px;">🎨 العَرْض <span class="zh-only">· 显示</span></h3>
+
+          <div style="display:flex; justify-content:space-between; 
+            align-items:center; padding:12px 8px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:22px;">🌙</span>
+              <div>
+                <div class="settings-label" style="font-size:14px; font-weight:600;">الوضع الليلي</div>
+                <div class="settings-sub" style="font-size:11px; color:#888;">夜间模式</div>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="settingsThemeToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; 
+            align-items:center; padding:12px 8px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:22px;">🎯</span>
+              <div>
+                <div class="settings-label" style="font-size:14px; font-weight:600;">وضع التركيز</div>
+                <div class="settings-sub" style="font-size:11px; color:#888;">专注模式 · يُضبّب الأقسام البعيدة</div>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="settingsFocusToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; 
+            align-items:center; padding:12px 8px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:22px;">⏱️</span>
+              <div>
+                <div class="settings-label" style="font-size:14px; font-weight:600;">التَّرْكِيز التِّلْقَائِيّ</div>
+                <div class="settings-sub" style="font-size:11px; color:#888;">自动专注 · بعد ٣٠ ثانية بدون تفاعل</div>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="settingsAutoFocusToggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; 
+            align-items:center; padding:12px 8px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:22px;">🌍</span>
+              <div>
+                <div class="settings-label" style="font-size:14px; font-weight:600;">الترجمة الصينية</div>
+                <div class="settings-sub" style="font-size:11px; color:#888;">中文翻译</div>
+              </div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="settingsTransToggle">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Arabic Font -->
+        <div style="margin-bottom:24px; padding-bottom:16px; 
+          border-bottom:1px solid #f0f0f0;">
+          <h3 style="font-size:14px; font-weight:600; 
+            color:#0E7C7B; margin:0 0 12px;">🔤 حجم الخط العربي</h3>
+          <div style="display:flex; gap:12px; align-items:center; 
+            padding:8px; background:rgba(14,124,123,0.05); 
+            border-radius:12px;">
+            <button id="arFontDecrease" style="width:38px; 
+              height:38px; border-radius:50%; border:none; 
+              background:#fff; color:#0E7C7B; font-size:20px; 
+              font-weight:700; cursor:pointer; 
+              box-shadow:0 2px 8px rgba(14,124,123,0.15);">−</button>
+            <div class="ar-preview" style="flex:1; text-align:center; 
+              font-weight:600; color:#1a1a2e; font-size:22px;">أَبْجَد</div>
+            <button id="arFontIncrease" style="width:38px; 
+              height:38px; border-radius:50%; border:none; 
+              background:#fff; color:#0E7C7B; font-size:20px; 
+              font-weight:700; cursor:pointer; 
+              box-shadow:0 2px 8px rgba(14,124,123,0.15);">+</button>
+          </div>
+        </div>
+
+        <!-- Chinese Font -->
+        <div class="zh-only" style="display:block">
+          <h3 style="font-size:14px; font-weight:600;
+            color:#0E7C7B; margin:0 0 12px;">中 حجم الخط الصيني</h3>
+          <div style="display:flex; gap:12px; align-items:center; 
+            padding:8px; background:rgba(14,124,123,0.05); 
+            border-radius:12px;">
+            <button id="cnFontDecrease" style="width:38px; 
+              height:38px; border-radius:50%; border:none; 
+              background:#fff; color:#0E7C7B; font-size:20px; 
+              font-weight:700; cursor:pointer; 
+              box-shadow:0 2px 8px rgba(14,124,123,0.15);">−</button>
+            <div class="cn-preview" style="flex:1; text-align:center; 
+              font-weight:600; color:#1a1a2e; font-size:18px;">汉字</div>
+            <button id="cnFontIncrease" style="width:38px; 
+              height:38px; border-radius:50%; border:none; 
+              background:#fff; color:#0E7C7B; font-size:20px; 
+              font-weight:700; cursor:pointer; 
+              box-shadow:0 2px 8px rgba(14,124,123,0.15);">+</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- ================= 🎓 لوحة أدوات المعلم (تظهر بزر الـ topbar) ================= -->
+  <div id="teacherToolbar" class="teacher-toolbar" aria-label="أدوات المعلم">
+    <div class="tt-panel" id="ttPanel">
+      <div class="tt-header">
+        <div class="tt-header-icon">🎓</div>
+        <div class="tt-header-text">
+          <span class="tt-title">أَدَوَات المُعَلِّم</span>
+          <span class="tt-zh">教师工具</span>
+        </div>
+        <button class="tt-close-btn" onclick="TeacherTools.togglePanel()" aria-label="إغلاق">✕</button>
+      </div>
+
+      <!-- صف الأزرار السريعة (4 أزرار في صف واحد) -->
+      <div class="tt-quick-row">
+        <button class="tt-quick-btn" onclick="TeacherTools.togglePresenter()" data-tip="عَرْض · 演示">
+          <span class="tt-q-ic">🔍</span>
+        </button>
+        <button class="tt-quick-btn" id="ttHideBtn" onclick="TeacherTools.toggleAnswers()" data-tip="إِخْفَاء · 隐藏">
+          <span class="tt-q-ic" id="ttHideIcon">🙈</span>
+        </button>
+        <button class="tt-quick-btn" onclick="TeacherTools.openBoard()" data-tip="سَبُّورَة · 白板">
+          <span class="tt-q-ic">📝</span>
+        </button>
+        <button class="tt-quick-btn" onclick="TeacherTools.openFlashcards()" data-tip="بِطَاقَات · 单词卡">
+          <span class="tt-q-ic">🃏</span>
+        </button>
+      </div>
+
+      <!-- العداد -->
+      <div class="tt-timer-block">
+        <div class="tt-timer-display" id="ttTimerDisplay">٠٠:٠٠</div>
+        <div class="tt-timer-row">
+          <button class="tt-time-btn" onclick="TeacherTools.startTimer(60)">١د</button>
+          <button class="tt-time-btn" onclick="TeacherTools.startTimer(180)">٣د</button>
+          <button class="tt-time-btn" onclick="TeacherTools.startTimer(300)">٥د</button>
+          <button class="tt-time-btn tt-stop" onclick="TeacherTools.stopTimer()" aria-label="إيقاف">⏹</button>
+        </div>
+      </div>
+
+      <!-- اختيار طالب عشوائي -->
+      <button class="tt-wide-btn" onclick="TeacherTools.randomStudent()">
+        <span class="tt-w-ic">🎯</span>
+        <span class="tt-w-lbl">طَالِب عَشْوَائِيّ <small class="zh-only">随机学生</small></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= 🃏 Flashcards Modal ================= -->
+  <div id="flashcardsModal" class="tt-modal" onclick="if(event.target===this)TeacherTools.closeFlashcards()">
+    <div class="tt-modal-card flashcards-card">
+      <div class="fc-progress">
+        <span id="fcCurrent">١</span> / <span id="fcTotal">١</span>
+      </div>
+      <div class="flashcard" id="flashcardContent" onclick="TeacherTools.flipCard()">
+        <div class="fc-front">
+          <div class="fc-emoji" id="fcEmoji">🏠</div>
+          <div class="fc-ar" id="fcAr"></div>
+          <div class="fc-hint">اِضْغَطْ لِلتَّرْجَمَة <span class="zh-only">· 点击翻译</span></div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-zh" id="fcZh"></div>
+          <div class="fc-hint">اِضْغَطْ لِلْعَوْدَة <span class="zh-only">· 点击返回</span></div>
+        </div>
+      </div>
+      <div class="fc-controls">
+        <button class="btn btn-ghost" onclick="TeacherTools.prevCard()">← السَّابِق</button>
+        <button class="btn btn-primary" onclick="TeacherTools.speakCard()">🔊 اِسْتَمِعْ</button>
+        <button class="btn btn-ghost" onclick="TeacherTools.nextCard()">التَّالِي →</button>
+      </div>
+      <button class="tt-modal-close" onclick="TeacherTools.closeFlashcards()">✕</button>
+    </div>
+  </div>
+
+  <!-- ================= 📝 Whiteboard Modal ================= -->
+  <div id="boardModal" class="tt-modal" onclick="if(event.target===this)TeacherTools.closeBoard()">
+    <div class="tt-modal-card board-card" id="boardCardEl">
+      <div class="board-toolbar">
+        <button class="board-tool" onclick="TeacherTools.boardSetColor('#1a1a2e')" style="background:#1a1a2e"
+          aria-label="أسود"></button>
+        <button class="board-tool" onclick="TeacherTools.boardSetColor('#ef4444')" style="background:#ef4444"
+          aria-label="أحمر"></button>
+        <button class="board-tool" onclick="TeacherTools.boardSetColor('#10b981')" style="background:#10b981"
+          aria-label="أخضر"></button>
+        <button class="board-tool" onclick="TeacherTools.boardSetColor('#0E7C7B')" style="background:#0E7C7B"
+          aria-label="أزرق"></button>
+        <input type="range" id="boardSize" min="2" max="20" value="4" oninput="TeacherTools.boardSize=this.value">
+        <button class="btn btn-ghost" onclick="TeacherTools.boardClear()">🗑️ مَسْح</button>
+      </div>
+      <canvas id="boardCanvas" class="board-canvas"></canvas>
+      <button class="board-fullscreen-btn" id="boardFsBtn" onclick="TeacherTools.toggleBoardFullscreen()"
+        aria-label="تَكْبِير/تَصْغِير · 全屏" title="تَكْبِير الشَّاشَة · 全屏">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          stroke-linejoin="round" class="fs-expand">
+          <path d="M3 9V3h6" />
+          <path d="M21 9V3h-6" />
+          <path d="M3 15v6h6" />
+          <path d="M21 15v6h-6" />
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          stroke-linejoin="round" class="fs-collapse">
+          <path d="M9 3v6H3" />
+          <path d="M15 3v6h6" />
+          <path d="M9 21v-6H3" />
+          <path d="M15 21v-6h6" />
+        </svg>
+      </button>
+      <button class="tt-modal-close" onclick="TeacherTools.closeBoard()">✕</button>
+    </div>
+  </div>
+
+  <!-- ================= 🎯 Random Student Modal ================= -->
+  <!-- ===== مودال تلميحات المحادثة ===== -->
+  <div id="speakTipModal" class="tt-modal" onclick="if(event.target===this)closeSpeakTip()">
+    <div class="tt-modal-card" style="max-width:420px;text-align:center;padding:40px 30px">
+      <div class="tt-modal-ar" style="font-size:28px;font-weight:700;margin-bottom:20px;color:var(--text)"></div>
+      <div class="tt-modal-zh" style="font-size:20px;color:var(--text-soft)"></div>
+      <button class="tt-modal-close" onclick="closeSpeakTip()" style="margin-top:30px">✕</button>
+    </div>
+  </div>
+
+  <div id="randomStudentModal" class="tt-modal"
+    onclick="if(event.target===this)document.getElementById('randomStudentModal').classList.remove('show')">
+    <div class="tt-modal-card rs-card">
+      <div class="rs-emoji">🎯</div>
+      <div class="rs-label">الطَّالِب المُخْتَار <span class="zh-only">· 选中的学生</span></div>
+      <div class="rs-number" id="rsNumber">?</div>
+      <button class="btn btn-primary" onclick="TeacherTools.spinRandom()">🎲 اِخْتَرْ مَرَّة أُخْرَى</button>
+      <button class="tt-modal-close"
+        onclick="document.getElementById('randomStudentModal').classList.remove('show')">✕</button>
+    </div>
+  </div>
+
+  
+  <script src="data/lesson.js"></script>
+  <script src="js/app.js"></script>
+  <script src="validators.js"></script>
+  <script>
+    const splashLoaderBar = document.querySelector('.splash-loader-bar');
+    if (splashLoaderBar) {
+      splashLoaderBar.addEventListener('animationend', () => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+          splash.classList.add('fade-out');
+          setTimeout(() => splash.remove(), 600);
+        }
+      });
+    }
+  </script>
+  <script>
+  /*
+   * Activity Center is optional to the lesson.  Keep its 22 renderers and
+   * runtime outside the critical load path, while retaining file:// support.
+   */
+  (function (window, document) {
+    'use strict';
+
+    if (window.ActivityCenterLoader) return;
+
+    var centerSources = [
+      'activity.js',
+      'bridge.js'
+    ];
+
+    var activitySources = {
+      1: 'activities/wheel.js',
+      2: 'activities/memory.js',
+      3: 'activities/tap-choice.js',
+      4: 'activities/sound-match.js',
+      5: 'activities/hidden-reveal.js',
+      6: 'activities/dark-room.js',
+      7: 'activities/sentence-builder.js',
+      8: 'activities/wechat.js',
+      9: 'activities/who-am-i.js',
+      10: 'activities/swipe-quiz.js',
+      11: 'activities/traffic-light.js',
+      12: 'activities/speed-reveal.js',
+      13: 'activities/quick-reaction.js',
+      14: 'activities/mini-maze.js',
+      15: 'activities/dots-hunter.js',
+      16: 'activities/conjugation-ladder.js',
+      17: 'activities/punctuation-editor.js',
+      18: 'activities/young-doctor.js',
+      19: 'activities/health-letter.js',
+      20: 'activities/board-game.js',
+      21: 'activities/spot-difference.js',
+      22: 'activities/progressive-story.js'
+    };
+
+    var rendererNames = {
+      1: 'renderWheel', 2: 'renderMemory', 3: 'renderTapChoice',
+      4: 'renderSoundMatch', 5: 'renderHiddenReveal', 6: 'renderDarkRoom',
+      7: 'renderSentenceBuilder', 8: 'renderWechat', 9: 'renderWhoAmI',
+      10: 'renderSwipeQuiz', 11: 'renderTrafficLight', 12: 'renderSpeedReveal',
+      13: 'renderQuickReaction', 14: 'renderMiniMaze', 15: 'renderDotsHunter',
+      16: 'renderConjugationLadder', 17: 'renderPunctuationEditor',
+      18: 'renderYoungDoctor', 19: 'renderHealthLetter', 20: 'renderBoardGame',
+      21: 'renderSpotDifference', 22: 'renderProgressiveStory'
+    };
+
+    var centerPromise = null;
+    var activityPromises = {};
+
+    function loadScriptOnce(src) {
+      return new Promise(function (resolve, reject) {
+        var selector = 'script[data-activity-source="' + src + '"]';
+        var existing = document.querySelector(selector);
+
+        if (existing) {
+          if (existing.dataset.activityLoaded === 'true') {
+            resolve();
+            return;
+          }
+          existing.addEventListener('load', resolve, { once: true });
+          existing.addEventListener('error', function () {
+            reject(new Error('Failed to load ' + src));
+          }, { once: true });
+          return;
+        }
+
+        var script = document.createElement('script');
+        script.src = src;
+        script.async = false;
+        script.dataset.activitySource = src;
+        script.onload = function () {
+          script.dataset.activityLoaded = 'true';
+          resolve();
+        };
+        script.onerror = function () {
+          if (script.parentNode) script.parentNode.removeChild(script);
+          reject(new Error('Failed to load ' + src));
+        };
+        document.head.appendChild(script);
+      });
+    }
+
+    function loadActivityCenter() {
+      if (window.ActivityBridge) return Promise.resolve(window.ActivityBridge);
+      if (centerPromise) return centerPromise;
+
+      centerPromise = centerSources.reduce(function (chain, src) {
+        return chain.then(function () { return loadScriptOnce(src); });
+      }, Promise.resolve()).then(function () {
+        if (!window.ActivityBridge) {
+          throw new Error('Activity Center did not initialise');
+        }
+        return window.ActivityBridge;
+      }).catch(function (error) {
+        centerPromise = null;
+        throw error;
+      });
+
+      return centerPromise;
+    }
+
+    function loadActivity(id) {
+      var src = activitySources[id];
+      var rendererName = rendererNames[id];
+
+      if (!src || !rendererName) {
+        return Promise.reject(new Error('Unknown activity: ' + id));
+      }
+      if (typeof window[rendererName] === 'function') {
+        return Promise.resolve(window[rendererName]);
+      }
+      if (activityPromises[id]) return activityPromises[id];
+
+      activityPromises[id] = loadScriptOnce(src).then(function () {
+        if (typeof window[rendererName] !== 'function') {
+          throw new Error('Activity renderer was not registered: ' + id);
+        }
+        return window[rendererName];
+      }).catch(function (error) {
+        delete activityPromises[id];
+        throw error;
+      });
+
+      return activityPromises[id];
+    }
+
+    function setButtonLoading(button, loading) {
+      if (!button) return;
+      if (loading) {
+        button.dataset.activityLabel = button.textContent;
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        button.textContent = '⏳';
+        return;
+      }
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+      button.textContent = button.dataset.activityLabel || '🎮';
+      delete button.dataset.activityLabel;
+    }
+
+    function open(button) {
+      if (window.ActivityBridge) {
+        window.ActivityBridge.showOverlay();
+        return Promise.resolve(window.ActivityBridge);
+      }
+
+      setButtonLoading(button, true);
+      return loadActivityCenter().then(function (bridge) {
+        setButtonLoading(button, false);
+        bridge.showOverlay();
+        return bridge;
+      }).catch(function (error) {
+        console.error('Activity Center failed to load:', error);
+        setButtonLoading(button, false);
+        if (button) {
+          button.textContent = '⚠️';
+          button.title = 'تعذّر تحميل الأنشطة. حاول مرة أخرى.';
+          setTimeout(function () {
+            button.textContent = '🎮';
+            button.title = 'الأنشطة التفاعلية';
+          }, 2600);
+        }
+        throw error;
+      });
+    }
+
+    window.ActivityCenterLoader = {
+      open: open,
+      loadActivityCenter: loadActivityCenter,
+      loadActivity: loadActivity
+    };
+  })(window, document);
+  </script>
+</body>
+
+</html>

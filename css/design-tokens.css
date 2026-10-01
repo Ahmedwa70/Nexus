@@ -1,0 +1,338 @@
+/* =============================================================================
+   Premium Educational Color System
+   -----------------------------------------------------------------------------
+   Intent: Navy carries trust, Teal carries learning interaction, Gold signals
+   achievement. Neutral surfaces dominate the interface; section colors are
+   reserved for borders, badges, icon containers, progress, compact actions,
+   and feedback. Load after legacy lesson styles.
+   ============================================================================= */
+
+:root {
+  /* ── Brand colors: platform identity and primary actions ────────────────── */
+  --brand-navy: #0D2B55;
+  --brand-teal: #0E7C7B;
+  --brand-gold: #C9A227;
+  --brand-primary: var(--brand-teal);
+  --brand-primary-dark: #0A6868;
+  --brand-secondary: var(--brand-navy);
+  --brand-accent: var(--brand-gold);
+  --brand-accent-strong: #806300;
+
+  /* ── Hero: Option C — Deep Blue Educational Card ───────────────────────── */
+  --hero-surface-start: #0B2749;
+  --hero-surface-end: #12365C;
+  --hero-teal-whisper: #2A7080;
+  --hero-gold-line: #C9A227;
+  --hero-shadow: 0 18px 44px rgba(13, 43, 85, 0.20);
+
+  /* ── Neutral premium surfaces: the dominant 80% visual layer ───────────── */
+  --page-background: #F4F5F7;
+  --surface: #F7F8FA;
+  --surface-subtle: #F1F3F5;
+  --surface-muted: #ECEFF2;
+  --surface-raised: #FFFFFF;
+  --card: #FFFFFF;
+  --card-hover: #FBFCFD;
+  --surface-teal: #F7F8FA;
+  --surface-navy: #F1F3F5;
+
+  /* ── Text: high-clarity Arabic and Chinese display hierarchy ───────────── */
+  --text-primary: #172033;
+  --text-secondary: #4A5568;
+  --text-muted: #5B6878;
+  --text-chinese: #4A5568;
+  --text-on-brand: #FFFFFF;
+
+  /* ── Borders: neutral first; accent borders identify learning sections ─── */
+  --border-subtle: #DEE3E8;
+  --border-strong: #C6CED7;
+  --glass-border: rgba(23, 32, 51, 0.10);
+  --glass-border-strong: rgba(23, 32, 51, 0.18);
+
+  /* ── Section colors: accents only, never broad content backgrounds ─────── */
+  /* Vocabulary — Teal */
+  --vocabulary-primary: #0E7C7B;
+  --vocabulary-soft: #F2F6F6;
+  --vocabulary-border: #C8DEDD;
+  --vocabulary-text: #0A6564;
+
+  /* Grammar — Professional blue */
+  --grammar-primary: #2E6F9E;
+  --grammar-soft: #F3F6F8;
+  --grammar-border: #CADBE7;
+  --grammar-text: #1B4E76;
+
+  /* Speaking — Warm orange */
+  --speaking-primary: #B45B22;
+  --speaking-soft: #F8F4F1;
+  --speaking-border: #E7D0C0;
+  --speaking-text: #873D10;
+
+  /* Activities — Soft violet */
+  --activity-primary: #70559B;
+  --activity-soft: #F5F3F8;
+  --activity-border: #D9D1E6;
+  --activity-text: #523C82;
+
+  /* Activity application surface — standalone from lesson surfaces */
+  --activity-overlay-canvas: #F2F4F7;
+  --activity-topbar: #FFFFFF;
+  --activity-surface: #FFFFFF;
+  --activity-surface-raised: #F8FAFC;
+  --activity-surface-hover: #F4F7F9;
+  --activity-border: #D7DFE7;
+  --activity-border-subtle: #E7ECF1;
+  --activity-text-primary: #172033;
+  --activity-text-secondary: #4A5568;
+  --activity-text-muted: #64748B;
+  --activity-accent: var(--activity-primary);
+  --activity-shadow: 0 10px 30px rgba(23, 32, 51, 0.10);
+
+  /* ── Chat activity (wechat) ──────────────────────────────────────────── */
+  --chat-header-bg: #0E7C7B;
+  --chat-header-text: #FFFFFF;
+  --chat-wallpaper: #E5DDD5;
+  --chat-bubble-peer: #FFFFFF;
+  --chat-bubble-peer-border: var(--glass-border);
+  --chat-bubble-student: #D4F5F4;
+  --chat-bubble-student-text: #172033;
+  --chat-system-bg: rgba(0,0,0,0.06);
+  --chat-composer-bg: #F0F0F0;
+  --chat-chip-border: var(--border-subtle);
+  --chat-avatar-peer-bg: #E0F2F1;
+  --chat-avatar-student-bg: #D4F5F4;
+  --chat-timestamp: var(--text-muted);
+  --chat-check: #0E7C7B;
+
+  /* Reading — Calm blue-green */
+  --reading-primary: #2D7384;
+  --reading-soft: #F2F7F8;
+  --reading-border: #C9E0E4;
+  --reading-text: #1E5A68;
+
+  /* Assessment — Amber / Gold */
+  --evaluation-primary: #8F5E00;
+  --evaluation-soft: #F8F5EE;
+  --evaluation-border: #E2D5B7;
+  --evaluation-text: #754B00;
+
+  /* ── Illustration colors: icons, diagrams, characters, and images only ─── */
+  --illustration-navy: #244B75;
+  --illustration-teal: #3B9694;
+  --illustration-gold: #C6A448;
+  --illustration-blue: #5D8FB8;
+  --illustration-orange: #CF8251;
+  --illustration-purple: #8975AB;
+  --illustration-slate: #8090A3;
+  --illustration-cloud: #E7EBEF;
+
+  /* ── Feedback colors: meaningful operational states ────────────────────── */
+  --success: #1E8449;
+  --success-soft: #EDF7F0;
+  --success-text: #1E8449;
+  --warning: #9A4D00;
+  --warning-soft: #FFF5EC;
+  --warning-text: #9A4D00;
+  --danger: #C62828;
+  --danger-soft: #FDEEEE;
+  --danger-text: #C62828;
+  --info: #0369A1;
+  --info-soft: #EDF6FB;
+  --info-text: #0369A1;
+
+  /* ── Geometry, elevation, and motion ───────────────────────────────────── */
+  --radius: 20px;
+  --radius-xl: 28px;
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --radius-card: 20px;
+  --radius-control: 14px;
+  --spot-radius: 180px;
+  --card-padding: clamp(20px, 2vw, 30px);
+  --card-shadow: 0 8px 24px rgba(23, 32, 51, 0.07);
+  --card-shadow-hover: 0 14px 32px rgba(23, 32, 51, 0.12);
+  --shadow: var(--card-shadow);
+  --shadow-lg: var(--card-shadow-hover);
+  --shadow-card: var(--card-shadow);
+  --shadow-hover: var(--card-shadow-hover);
+  --focus-ring: 0 0 0 4px rgba(13, 43, 85, 0.18);
+  --transition: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-card: var(--transition);
+
+  /* ── Typography and utility values retained for legacy lesson compatibility */
+  --ar-size: 1rem;
+  --zh-size: 0.95rem;
+  --mx: 50%;
+  --my: 50%;
+  --vap-progress: var(--brand-primary);
+  --topbar-bg: rgba(255, 255, 255, 0.94);
+  --overlay-bg: rgba(13, 43, 85, 0.08);
+  --glow-purple: rgba(112, 85, 155, 0.22);
+  --glow-sky: rgba(46, 111, 158, 0.18);
+
+  /* ── Legacy surface bridge: preserves current CSS variable names ───────── */
+  --bg: var(--page-background);
+  --bg-2: var(--surface);
+  --bg-primary: var(--page-background);
+  --bg-secondary: var(--surface-subtle);
+  --bg-card: var(--card);
+  --bg-card-hover: var(--card-hover);
+  --text: var(--text-primary);
+  --text-soft: var(--text-secondary);
+  --primary: var(--brand-primary);
+  --primary-dark: var(--brand-primary-dark);
+  --secondary: var(--brand-secondary);
+  --accent: var(--brand-accent);
+  --card-border: var(--border-subtle);
+
+  /* ── Legacy accent bridge: semantic mapping, not new visual surface colors */
+  --accent-emerald: var(--success);
+  --accent-amber: var(--evaluation-primary);
+  --accent-purple: var(--activity-primary);
+  --accent-sky: var(--grammar-primary);
+  --accent-rose: var(--danger);
+
+  /* ── Legacy learning bridge ────────────────────────────────────────────── */
+  --vocabulary: var(--vocabulary-primary);
+  --grammar: var(--grammar-primary);
+  --speaking: var(--speaking-primary);
+  --activity: var(--activity-primary);
+  --reading: var(--reading-primary);
+  --evaluation: var(--evaluation-primary);
+}
+
+[data-theme="dark"] {
+  /* ── Brand and hero: deep educational blue stays calm on projector displays */
+  --brand-navy: #0D2B55;
+  --brand-teal: #0E7C7B;
+  --brand-gold: #D6B65C;
+  --brand-primary: var(--brand-teal);
+  --brand-primary-dark: #086463;
+  --brand-secondary: #173B68;
+  --brand-accent: var(--brand-gold);
+  --brand-accent-strong: #D6B65C;
+  --hero-surface-start: #081F3C;
+  --hero-surface-end: #103153;
+  --hero-teal-whisper: #235D69;
+  --hero-gold-line: #D6B65C;
+  --hero-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
+
+  /* ── Neutral navy surfaces ─────────────────────────────────────────────── */
+  --page-background: #0C1520;
+  --surface: #111B27;
+  --surface-subtle: #0F1823;
+  --surface-muted: #1A2531;
+  --surface-raised: #1C2836;
+  --card: #162131;
+  --card-hover: #1C2836;
+  --surface-teal: #111B27;
+  --surface-navy: #162131;
+  --border-subtle: #2B3949;
+  --border-strong: #3D5065;
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-border-strong: rgba(255, 255, 255, 0.16);
+
+  /* ── Text ──────────────────────────────────────────────────────────────── */
+  --text-primary: #F8F9FA;
+  --text-secondary: #C1CDD6;
+  --text-muted: #A6B1BD;
+  --text-chinese: #C1CDD6;
+
+  /* ── Section colors: muted enough for dark premium surfaces ────────────── */
+  --vocabulary-primary: #72C8C4;
+  --vocabulary-soft: #172A2D;
+  --vocabulary-border: #31565A;
+  --vocabulary-text: #80D1CD;
+
+  --grammar-primary: #7AB6D6;
+  --grammar-soft: #182633;
+  --grammar-border: #385B73;
+  --grammar-text: #A4D0EB;
+
+  --speaking-primary: #E7A36E;
+  --speaking-soft: #2D231D;
+  --speaking-border: #6A4A38;
+  --speaking-text: #F7C89F;
+
+  --activity-primary: #B4A3DC;
+  --activity-soft: #24202E;
+  --activity-border: #5A4C76;
+  --activity-text: #C8BCE7;
+
+  /* Activity application surface — opaque, independent from the lesson */
+  --activity-overlay-canvas: #0B1320;
+  --activity-topbar: #111B27;
+  --activity-surface: #162131;
+  --activity-surface-raised: #1C2836;
+  --activity-surface-hover: #223043;
+  --activity-border: #34465A;
+  --activity-border-subtle: #263547;
+  --activity-text-primary: #F8F9FA;
+  --activity-text-secondary: #C1CDD6;
+  --activity-text-muted: #A6B1BD;
+  --activity-accent: var(--activity-primary);
+  --activity-shadow: 0 10px 30px rgba(0, 0, 0, 0.30);
+
+  /* ── Chat activity (wechat) dark ─────────────────────────────────────── */
+  --chat-header-bg: #0A4E4D;
+  --chat-header-text: #F0F0F0;
+  --chat-wallpaper: #0B1219;
+  --chat-bubble-peer: #1C2836;
+  --chat-bubble-peer-border: var(--glass-border);
+  --chat-bubble-student: #14403F;
+  --chat-bubble-student-text: #E8F5F4;
+  --chat-system-bg: rgba(255,255,255,0.08);
+  --chat-composer-bg: #1A2433;
+  --chat-chip-border: var(--border-subtle);
+  --chat-avatar-peer-bg: #1A3A39;
+  --chat-avatar-student-bg: #14403F;
+  --chat-timestamp: var(--text-muted);
+  --chat-check: #72C8C4;
+
+  --reading-primary: #78B8C2;
+  --reading-soft: #17262B;
+  --reading-border: #365B62;
+  --reading-text: #A6D6DE;
+
+  --evaluation-primary: #D6B65C;
+  --evaluation-soft: #2D281A;
+  --evaluation-border: #706039;
+  --evaluation-text: #F0D889;
+
+  /* ── Illustration colors ───────────────────────────────────────────────── */
+  --illustration-navy: #91AEC8;
+  --illustration-teal: #6FC1BD;
+  --illustration-gold: #D8BE70;
+  --illustration-blue: #8CBFDE;
+  --illustration-orange: #E9AA7B;
+  --illustration-purple: #B5A7D5;
+  --illustration-slate: #AAB7C5;
+  --illustration-cloud: #DCE4EB;
+
+  /* ── Feedback colors ───────────────────────────────────────────────────── */
+  --success-soft: #153B29;
+  --success-text: #73D5A0;
+  --warning-soft: #442A16;
+  --warning-text: #F0C378;
+  --danger-soft: #461F25;
+  --danger-text: #F29494;
+  --info-soft: #15384E;
+  --info-text: #87C6E8;
+
+  /* ── Elevation and utilities ───────────────────────────────────────────── */
+  --card-shadow: 0 8px 24px rgba(0, 0, 0, 0.26);
+  --card-shadow-hover: 0 16px 36px rgba(0, 0, 0, 0.34);
+  --focus-ring: 0 0 0 4px rgba(143, 175, 203, 0.24);
+  --topbar-bg: rgba(12, 21, 32, 0.94);
+  --overlay-bg: rgba(120, 184, 194, 0.08);
+  --glow-purple: rgba(180, 163, 220, 0.22);
+  --glow-sky: rgba(122, 182, 214, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition: 1ms linear;
+    --transition-card: 1ms linear;
+  }
+}
