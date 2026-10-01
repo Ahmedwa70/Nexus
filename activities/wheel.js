@@ -2,20 +2,25 @@
 // wheel.js — عجلة الحظ
 // البيانات: [{ arabic, chinese, emoji }]  — يُجهّزها محوّل 'wheel' في bridge.js
 // عدد القطاعات = طول المصفوفة الواردة (يحكمه config.limit في activity.js).
+//
+// مبدأ العرض: الدوران يُطبَّق داخل اللوحة (ctx.rotate) لا على عنصرها (CSS
+// transform). لولا ذلك لدار النصّ مع العجلة وانقلب رأساً على عقب. ولأن
+// الدوران صار داخلياً، تُرسم الكلمات أفقيةً دائماً مهما دارت العجلة.
 // ============================================================
 
 let wheelSpinning = false;
 let _wheelVocab;
+let _wheelLayout = null;
 let _wheelResize = null;
 
 const WHEEL_FONT = '"Noto Sans Arabic", sans-serif';
+const WHEEL_MAX_LINES = 3;
 const WHEEL_COLORS = [
   '#4c1d95', '#1e40af', '#065f46', '#92400e', '#7c2d12', '#1e3a5f',
   '#2d1b69', '#0c4a6e', '#064e3b', '#451a03', '#1a1a2e', '#0a0a1a'
 ];
 
 // ── المقاس: يُشتق من المساحة المتاحة، لا رقم ثابت ──────────────
-// 340px ثابتة كانت تشغل 17.7% من شاشة 1920 — غير صالحة للعرض الصفّي.
 function wheelSize(canvas) {
   const host = canvas.parentElement;
   const byWidth = host ? host.clientWidth - 56 : 340;
@@ -23,30 +28,42 @@ function wheelSize(canvas) {
   return Math.round(Math.max(280, Math.min(byWidth, byHeight, 680)));
 }
 
-// ── حجم خط واحد يتّسع له أطول نص: الاتساق أهم من تكبير كلمة ──
-function fitFontSize(ctx, labels, radius, n, padOuter, hubRadius) {
-  const arc = (2 * Math.PI * radius) / n;          // سُمك القطاع عند المحيط
-  const maxWidth = radius - padOuter - hubRadius - 8;
-  let size = Math.max(12, Math.min(radius * 0.135, arc * 0.55, 34));
-  for (;;) {
-    ctx.font = 'bold ' + size + 'px ' + WHEEL_FONT;
-    let widest = 0;
-    for (let i = 0; i < labels.length; i++) {
-      const w = ctx.measureText(labels[i]).width;
-      if (w > widest) widest = w;
-    }
-    if (widest <= maxWidth || size <= 11) return size;
-    size -= 1;
+// ── تقسيم النص إلى سطور تتّسع في عرض الوتد ─────────────────────
+// بلا تقسيم يفرض أطولُ عبارة خطاً صغيراً على كل الكلمات.
+function wrapLabel(ctx, text, maxWidth) {
+  const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return [''];
+  const lines = [];
+  let line = words[0];
+  for (let i = 1; i < words.length; i++) {
+    const candidate = line + ' ' + words[i];
+    if (ctx.measureText(candidate).width <= maxWidth) line = candidate;
+    else { lines.push(line); line = words[i]; }
   }
+  lines.push(line);
+  return lines;
 }
 
-function drawWheel(vocab) {
-  const canvas = document.getElementById('wheel-canvas');
-  if (!canvas) return;
-  const n = vocab.length;
-  if (!n) return;
+// ── حجم خط واحد لكل القطاعات: الاتساق أهم من تكبير كلمة ───────
+function layoutLabels(ctx, labels, maxWidth) {
+  for (let size = 40; size >= 9; size--) {
+    ctx.font = 'bold ' + size + 'px ' + WHEEL_FONT;
+    const wrapped = labels.map(function (t) { return wrapLabel(ctx, t, maxWidth); });
+    const tooTall = wrapped.some(function (ls) { return ls.length > WHEEL_MAX_LINES; });
+    const tooWide = wrapped.some(function (ls) {
+      return ls.some(function (l) { return ctx.measureText(l).width > maxWidth; });
+    });
+    if (!tooTall && !tooWide) return { size: size, lines: wrapped };
+  }
+  ctx.font = 'bold 9px ' + WHEEL_FONT;
+  return { size: 9, lines: labels.map(function (t) { return [String(t || '')]; }) };
+}
 
-  // لوحة بدقّة الشاشة: بلا هذا يظهر النص مشوّشاً على الشاشات عالية الكثافة
+// ── حساب الهندسة مرة واحدة لكل عرض (لا في كل إطار) ────────────
+function layoutWheel(vocab) {
+  const canvas = document.getElementById('wheel-canvas');
+  if (!canvas || !vocab || !vocab.length) return null;
+
   const size = wheelSize(canvas);
   const dpr = window.devicePixelRatio || 1;
   canvas.width = Math.round(size * dpr);
@@ -56,24 +73,44 @@ function drawWheel(vocab) {
 
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, size, size);
 
-  const cx = size / 2;
-  const cy = size / 2;
+  const n = vocab.length;
   const r = size / 2 - 8;
   const hubR = Math.max(16, r * 0.14);
-  const padOuter = Math.max(10, r * 0.09);
   const angle = (2 * Math.PI) / n;
 
-  const labels = vocab.map(function (v) { return v.arabic || ''; });
-  const fontSize = fitFontSize(ctx, labels, r, n, padOuter, hubR);
+  // كلما كثرت القطاعات ضاق الوتد، فنُبعد النص عن المركز ليتّسع
+  const dFactor = n <= 8 ? 0.58 : n <= 14 ? 0.68 : 0.76;
+  const d = r * dFactor;
+  // tan غير معرّفة عند نصف زاوية ٩٠° (قطاعان) وتؤول إلى صفر عند ١٨٠° (قطاع واحد)،
+  // فنحدّ نصف الزاوية بـ ٦٠° ونسقف العرض بقطر العجلة.
+  const halfAngle = Math.min(angle / 2, Math.PI / 3);
+  const maxWidth = Math.max(28, Math.min(2 * d * Math.tan(halfAngle) * 0.90, 1.7 * r));
 
-  for (let i = 0; i < n; i++) {
-    const start = angle * i - Math.PI / 2;
+  const fit = layoutLabels(ctx, vocab.map(function (v) { return v.arabic || ''; }), maxWidth);
+
+  return {
+    ctx: ctx, canvas: canvas, size: size, n: n, r: r, hubR: hubR,
+    cx: size / 2, cy: size / 2, angle: angle, d: d,
+    fontSize: fit.size, lineHeight: Math.round(fit.size * 1.18), lines: fit.lines
+  };
+}
+
+// ── الرسم: يُستدعى في كل إطار أثناء الدوران ────────────────────
+function paintWheel(rotDeg) {
+  const L = _wheelLayout;
+  if (!L) return;
+  const ctx = L.ctx;
+  const rot = (rotDeg || 0) * Math.PI / 180;
+
+  ctx.clearRect(0, 0, L.size, L.size);
+
+  for (let i = 0; i < L.n; i++) {
+    const start = L.angle * i - Math.PI / 2 + rot;
 
     ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, r, start, start + angle);
+    ctx.moveTo(L.cx, L.cy);
+    ctx.arc(L.cx, L.cy, L.r, start, start + L.angle);
     ctx.closePath();
     ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
     ctx.fill();
@@ -81,40 +118,46 @@ function drawWheel(vocab) {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // ── النص ──
-    // كان يدور مع القطاع دائماً، فينقلب رأساً على عقب في النصف الأيسر.
-    // الحل: إن وقع منتصف القطاع في النصف الأيسر، ندور نصف دورة إضافية
-    // ونعكس محاذاة النص ليبقى الطرف الخارجي هو البداية.
-    const mid = start + angle / 2;
-    const norm = ((mid % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    const flip = norm > Math.PI / 2 && norm < 3 * Math.PI / 2;
+    // النص أفقي دائماً: لا ctx.rotate هنا، فلا ينقلب مهما دارت العجلة
+    const mid = start + L.angle / 2;
+    const lx = L.cx + L.d * Math.cos(mid);
+    const ly = L.cy + L.d * Math.sin(mid);
+    const lines = L.lines[i];
+    const top = ly - ((lines.length - 1) * L.lineHeight) / 2;
 
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(flip ? mid + Math.PI : mid);
-    ctx.font = 'bold ' + fontSize + 'px ' + WHEEL_FONT;
+    ctx.font = 'bold ' + L.fontSize + 'px ' + WHEEL_FONT;
     ctx.fillStyle = 'white';
-    ctx.textAlign = flip ? 'left' : 'right';
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(labels[i], flip ? -(r - padOuter) : (r - padOuter), 0);
-    ctx.restore();
+    ctx.shadowColor = 'rgba(0,0,0,0.65)';
+    ctx.shadowBlur = 4;
+    for (let k = 0; k < lines.length; k++) {
+      ctx.fillText(lines[k], lx, top + k * L.lineHeight);
+    }
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = 'transparent';
   }
 
   ctx.beginPath();
-  ctx.arc(cx, cy, hubR, 0, 2 * Math.PI);
+  ctx.arc(L.cx, L.cy, L.hubR, 0, 2 * Math.PI);
   ctx.fillStyle = '#a78bfa';
   ctx.fill();
   ctx.strokeStyle = 'white';
   ctx.lineWidth = 3;
   ctx.stroke();
+}
 
+function drawWheel(vocab) {
+  _wheelLayout = layoutWheel(vocab);
+  if (!_wheelLayout) return;
+  const canvas = _wheelLayout.canvas;
   canvas.dataset.rotation = canvas.dataset.rotation || '0';
+  paintWheel(parseFloat(canvas.dataset.rotation));
 }
 
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   // بلا اقتطاع هنا: العدد يحدّده config.limit في activity.js عبر bridge.js.
-  // الاقتطاع المزدوج كان يجعل limit إعداداً كاذباً.
   const vocab = _wheelVocab = data;
 
   ac.innerHTML = `
@@ -139,7 +182,6 @@ function render(runtime, data) {
 
   drawWheel(vocab);
 
-  // إعادة الرسم عند تغيّر المقاس — ومعها تنظيف المستمع عند مغادرة النشاط
   if (_wheelResize) window.removeEventListener('resize', _wheelResize);
   _wheelResize = function () {
     if (!document.getElementById('wheel-canvas')) {
@@ -154,7 +196,7 @@ function render(runtime, data) {
   function spinWheel() {
     if (wheelSpinning) return;
     const canvas = document.getElementById('wheel-canvas');
-    if (!canvas) return;
+    if (!canvas || !_wheelLayout) return;
     const items = _wheelVocab;
     const n = items.length;
     if (!n) return;
@@ -169,7 +211,7 @@ function render(runtime, data) {
       const t = Math.min((now - start) / duration, 1);
       const ease = 1 - Math.pow(1 - t, 4);
       const rot = currentRot + totalDeg * ease;
-      canvas.style.transform = `rotate(${rot}deg)`;
+      paintWheel(rot);                       // الدوران داخل اللوحة، والنص يبقى أفقياً
       if (t < 1) { requestAnimationFrame(animate); return; }
 
       canvas.dataset.rotation = rot % 360;
