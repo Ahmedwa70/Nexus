@@ -7,6 +7,11 @@
 //   node sanitize_lesson.js lesson_raw.js              ← يُعدّل الملف في مكانه
 //   node sanitize_lesson.js lesson_raw.js lesson.js    ← يكتب ملفاً جديداً
 //
+// ضمانات السلامة:
+//   • عند الرفض (exit 1) لا يُكتب أي ملف — المدخل يبقى كما هو.
+//   • عند التعديل في المكان تُحفظ نسخة احتياطية: <الملف>.bak-<الوقت>
+//   • إذا تعذّر حفظ النسخة الاحتياطية تُلغى الكتابة كلياً.
+//
 // Pipeline الكامل:
 //   node sanitize_lesson.js lesson_raw.js lesson.js
 //   node validate_lesson.js lesson.js
@@ -165,11 +170,12 @@ if (/^import\s+/m.test(text)) {
 
 const hasChanges  = fixes.length > 0;
 const hasRefusals = refused.length > 0;
+const inPlace     = (OUTPUT === INPUT);
 
 console.log('\n' + '═'.repeat(60));
 console.log('  LESSON SANITIZER');
 console.log('  Input:  ' + INPUT);
-console.log('  Output: ' + OUTPUT);
+console.log('  Output: ' + OUTPUT + (inPlace ? '  (كتابة في المكان)' : ''));
 console.log('═'.repeat(60));
 
 if (fixes.length > 0) {
@@ -186,7 +192,38 @@ if (!hasChanges && !hasRefusals) {
     console.log('\n  ✅ الملف نظيف — لا تعديلات مطلوبة');
 }
 
-// نكتب الملف حتى لو لم تكن هناك تعديلات (للـ pipeline)
+// ================================================================
+// عقد الكتابة — ثلاث قواعد لا تُخرق
+// ================================================================
+// 1) عند الرفض: لا تُكتب أي بايت. الملف المرفوض يجب أن يصل إلى
+//    المراجعة اليدوية بصيغته الأصلية، وإلا فُقد ما يُراجَع.
+// 2) عند الكتابة في المكان: تُحفظ نسخة احتياطية من الأصل قبل
+//    الكتابة، وإذا تعذّر حفظها تُلغى الكتابة كلياً.
+// 3) عند وجود مخرَج منفصل: يُكتب دائماً ولو بلا تعديلات، لأن
+//    generate_lesson.sh يعتمد على وجود الملف في الخطوة التالية.
+// ================================================================
+
+if (hasRefusals) {
+    console.log('\n  🛑 لم تُكتب أي ملفات — المدخل باقٍ كما هو:');
+    console.log('     ' + INPUT);
+    console.log('\n' + '═'.repeat(60));
+    console.log('\n  ⚠️  يوجد ' + refused.length + ' تحذير يحتاج مراجعة يدوية قبل المتابعة\n');
+    process.exit(1);
+}
+
+if (inPlace && text !== raw) {
+    const stamp  = new Date().toISOString().replace(/[:.]/g, '-').replace(/Z$/, '');
+    const backup = INPUT + '.bak-' + stamp;
+    try {
+        fs.writeFileSync(backup, raw, 'utf8');
+        console.log('\n  🛟 نسخة احتياطية من الأصل: ' + path.basename(backup));
+    } catch (e) {
+        console.error('\n  ❌ تعذّر إنشاء نسخة احتياطية: ' + e.message);
+        console.error('  🛑 أُلغيت الكتابة — الملف الأصلي سليم.\n');
+        process.exit(1);
+    }
+}
+
 try {
     fs.writeFileSync(OUTPUT, text, 'utf8');
     console.log('\n  💾 الملف الناتج: ' + OUTPUT);
@@ -196,14 +233,5 @@ try {
 }
 
 console.log('═'.repeat(60));
-
-// exit code:
-// 0 = نظيف أو تم إصلاحه بنجاح → يمكن المتابعة للـ validate
-// 1 = يوجد ما يحتاج مراجعة يدوية → يجب التوقف
-if (hasRefusals) {
-    console.log('\n  ⚠️  يوجد ' + refused.length + ' تحذير يحتاج مراجعة يدوية قبل المتابعة\n');
-    process.exit(1);
-} else {
-    console.log('\n  ✅ جاهز للـ validate → node validate_lesson.js ' + OUTPUT + '\n');
-    process.exit(0);
-}
+console.log('\n  ✅ جاهز للـ validate → node validate_lesson.js ' + OUTPUT + '\n');
+process.exit(0);
