@@ -1,0 +1,9 @@
+# لقطات المشروع المحلية (snapshots) — لا تُرفع إلى Git
+.snapshots/
+
+# نسخ احتياطية مؤقتة
+*.bak
+*.bak-*
+
+node_modules/
+.DS_Store
