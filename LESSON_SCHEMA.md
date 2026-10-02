@@ -645,7 +645,14 @@ patternFill: {
 
 #### U — الأنشطة المخصصة الديناميكية (Custom Dynamic Activities)
 
-هذه الحقول اختيارية — يملؤها الـ AI فقط عند الحاجة لتخصيص محتوى الألعاب المخصصة. إذا غابت هذه الحقول → النظام يستخدم البيانات الاحتياطية في `activity.js` تلقائياً.
+هذه الحقول تُغذّي الألعاب التي **لا يمكن اشتقاق محتواها** من بقية أقسام الدرس.
+
+> **⚠️ تصحيح (2026-10-02):** لا توجد «بيانات احتياطية في `activity.js`» لهذه الأنشطة.
+> فُحِص الأمر: الأنشطة الخمسة (5، 8، 9، 18، 19) **لا يملك أيٌّ منها حقل `data`** في
+> `activity.js`. فإذا غاب الحقل من `lesson.js`، يفتح النشاط على رسالة
+> «لا تتوفر بيانات مخصصة لهذا النشاط في هذا الدرس» ولا يعمل إطلاقاً.
+>
+> لذلك: الحقل المعلَّم **🔴 مطلوب** يجب توليده مع كل درس بلا استثناء.
 
 **⚠️ تحذير صارم — هذه الحقول تضاف إلى `exercises` (القسم 9)، وليس إلى `activities` (القسم 11). `activities: []` يظل فارغاً إلزامياً.**
 
@@ -670,12 +677,44 @@ customWechat: [   // تسلسل حوار — اختياري
 ]
 ```
 
-##### customWhoAmI (id:9)
+##### customWhoAmI (id:9) — 🔴 مطلوب
 ```js
-customWhoAmI: [   // 4-5 كلمات — اختياري
-  { word: STRING, chinese: STRING, hints: [STRING, STRING, STRING] }
+customWhoAmI: [   // 4-5 ألغاز — مطلوب
+  {
+    word:    STRING,                    // الكلمة المقصودة، مشكّلة
+    chinese: STRING,                    // معناها بالصينية
+    hints:   [STRING, STRING, STRING]   // ثلاثة تلميحات بالعربية
+  }
 ]
 ```
+
+**قواعد التوليد — خمس قواعد مُلزِمة:**
+
+```
+١ · word مأخوذة من vocab الدرس حرفياً — ممنوع كلمة من خارج الدرس
+٢ · ثلاثة تلميحات بالضبط، مرتّبة من العام إلى الخاص (سقالات تدريجية)
+      hints[0] = الفئة أو الوظيفة العامة
+      hints[1] = خاصية مميِّزة
+      hints[2] = سياق من الدرس نفسه يكاد يكشفها
+٣ · مفردات التلميحات من الدرس أو أبسط منها — لا كلمات أصعب من المطلوبة
+٤ · ❌ ممنوع منعاً باتاً ذكر الكلمة أو جذرها داخل تلميحاتها
+٥ · 4-5 ألغاز، وكلماتها مختلفة لا تتكرر
+```
+
+**مثال على الشكل** (من درس التخييم — للتوضيح فقط، لا للنسخ):
+```js
+{ word: "الخَيْمَة", chinese: "帐篷", hints: [
+    "أَنَا بَيْتٌ صَغِيرٌ مِنْ قُمَاش",                 // عام
+    "تَنَامُ فِي دَاخِلِي لَيْلاً",                      // مميِّز
+    "تَحْمِلُنِي مَعَكَ إِلَى الغَابَةِ أَوِ الشَّاطِئ"   // سياق الدرس
+]}
+```
+
+> **لماذا القاعدة ٤ تقول «أو جذرها»:** التلميح الذي يحتوي الكلمة يُلغي التمرين،
+> والجذر المشترك يفعل الشيء نفسه. فلو كُتب في تلميح «الخَيْمَة» لفظُ «المُخَيَّم»
+> لَكَشَفَها، لأن الجذر واحد (خ-ي-م) والطالب يستنتجها فوراً.
+> لذلك جاء التلميح الثالث أعلاه بـ «الغَابَة» و«الشَّاطِئ» — مفردتان من الدرس
+> تَضَعان الكلمة في سياقها دون أن تلمسا جذرها.
 
 ##### customYoungDoctor (id:18)
 ```js
@@ -759,11 +798,11 @@ activities: []
 | 2 | memory | `vocab` | `LESSON_DATA.vocab` |
 | 3 | tap-choice | `exercises.mcq` | `LESSON_DATA.exercises.mcq` |
 | 4 | sound-match | `vocab` | `LESSON_DATA.vocab` |
-| 5 | hidden-reveal | `exercises.customHiddenReveal` | `LESSON_DATA.exercises.customHiddenReveal` (احتياطي: activity.js data) |
+| 5 | hidden-reveal | `exercises.customHiddenReveal` | `LESSON_DATA.exercises.customHiddenReveal` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
 | 6 | dark-room | `vocab` | `LESSON_DATA.vocab` |
 | 7 | sentence-builder | `dialogue` | `LESSON_DATA.dialogue` |
-| 8 | wechat | `exercises.customWechat` | `LESSON_DATA.exercises.customWechat` (احتياطي: activity.js data) |
-| 9 | who-am-i | `exercises.customWhoAmI` | `LESSON_DATA.exercises.customWhoAmI` (احتياطي: activity.js data) |
+| 8 | wechat | `exercises.customWechat` | `LESSON_DATA.exercises.customWechat` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
+| 9 | who-am-i | `exercises.customWhoAmI` | `LESSON_DATA.exercises.customWhoAmI` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
 | 10 | swipe-quiz | `exercises.trueFalse` | `LESSON_DATA.exercises.trueFalse` |
 | 11 | traffic-light | `grammar` | `LESSON_DATA.grammar` (محول تلقائي) |
 | 12 | speed-reveal | `vocab` | `LESSON_DATA.vocab` |
@@ -772,8 +811,8 @@ activities: []
 | 15 | dots-hunter | `vocab` | `LESSON_DATA.vocab` (محول تلقائي) |
 | 16 | conjugation-ladder | `grammar` | `LESSON_DATA.grammar` (محول تلقائي) |
 | 17 | punctuation-editor | `exercises.mcq` | `LESSON_DATA.exercises.mcq` (محول تلقائي) |
-| 18 | young-doctor | `exercises.customYoungDoctor` | `LESSON_DATA.exercises.customYoungDoctor` (احتياطي: activity.js data) |
-| 19 | health-letter | `exercises.customHealthLetter` | `LESSON_DATA.exercises.customHealthLetter` (احتياطي: activity.js data) |
+| 18 | young-doctor | `exercises.customYoungDoctor` | `LESSON_DATA.exercises.customYoungDoctor` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
+| 19 | health-letter | `exercises.customHealthLetter` | `LESSON_DATA.exercises.customHealthLetter` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
 | 20 | board-game | `explain` | `LESSON_DATA.explain` (محول تلقائي) |
 | 21 | spot-difference | `vocab` | `LESSON_DATA.vocab` (محول تلقائي) |
 | 22 | progressive-story | `dialogue` | `LESSON_DATA.dialogue` |
@@ -872,6 +911,7 @@ activities: []
 □ dialogue.length ≥ 6 (TWIN-2 — dialogue كافٍ لألعاب الحوار)
 □ paragraph.sentence + challenge.sentence: عدد ___ = answers.length بالضبط (TWIN-3)
 □ vocab[0..3] = صحيحة selectWords، vocab[4..7] = خاطئة (TWIN-4)
+□ exercises.customWhoAmI موجود — وإلا فتح نشاط «مَن أنا؟» فارغاً (لا احتياطي)
 ```
 
 ## 🤖 البرومبت الجاهز لإرساله لأي AI
@@ -917,11 +957,21 @@ activities: []
 - rewrite: instruction بالصينية (مثل "用「هُوَ」改写")
 - جميع الإجابات (answer/answers/data-answer) بدون تشكيل
 
+━━━ حقول exercises المخصصة (داخل القسم 9) ━━━
+🔴 exercises.customWhoAmI — مطلوب، 4-5 ألغاز:
+   { word, chinese, hints: [3 تلميحات] }
+   ١ · word من vocab الدرس حرفياً
+   ٢ · ثلاثة تلميحات، من العام إلى الخاص
+   ٣ · مفردات التلميحات من الدرس أو أبسط
+   ٤ · ❌ ممنوع ذكر الكلمة أو جذرها في تلميحاتها
+   ٥ · كلمات الألغاز مختلفة لا تتكرر
+   ⚠️ إن غاب هذا الحقل، يفتح نشاط «مَن أنا؟» فارغاً — لا يوجد احتياطي
+
 ━━━ الأنشطة (القسم 11 — مجمّد، فارغ إلزامياً) ━━━
 🔴 ممنوع إضافة أي شيء في activities[]
 → activities: [] فارغ — هذا قانون توأمي صارم
 → الأنشطة تُدار بالكامل بواسطة activity.js + bridge.js (ثابتان على السيرفر)
-→ الـ AI مسؤول فقط عن ملء الأقسام 1–10 بجودة عالية (vocab ≥ 12، dialogue ≥ 6، إلخ)
+→ الـ AI مسؤول عن ملء الأقسام 1–10 بجودة عالية (vocab ≥ 12، dialogue ≥ 6، إلخ)
 → شروط فولاذية: راجع TWIN-1 إلى TWIN-4 أعلاه — أي خلل في 1–10 يكسر الألعاب صامتاً
 
 القانون: LESSON_SCHEMA.md (مرفق — القسم 11 مجمّد)
@@ -951,6 +1001,8 @@ activities: []
 □ challenge.sentence: عدد ___ = answers.length بالضبط (TWIN-3)
 □ vocab[0..3] صحيحة لـ selectWords، vocab[4..7] خاطئة (TWIN-4)
 □ fillBlanks: كل sentence تحتوي ___ واحد → answer واحد
+□ exercises.customWhoAmI موجود — 4-5 ألغاز، كل لغز 3 تلميحات
+□ customWhoAmI[].word موجودة في vocab — ولا تلميح يحمل الكلمة أو جذرها
 ```
 
 ### 🟡 QUALITY (جودة بيداغوجية)
