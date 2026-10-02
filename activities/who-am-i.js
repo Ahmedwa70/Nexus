@@ -1,5 +1,34 @@
 let wiState = {};
 
+// ── تطبيع عربي قبل المقارنة ──────────────────────────────────
+// الكلمة في lesson.js مشكّلة، والطالب يكتب غالباً بلا تشكيل، وقد يكتب
+// «ه» بدل «ة» أو «ا» بدل «أ». فنُسقط هذه الفروق قبل المقارنة.
+function wiNormalize(text) {
+  return String(text == null ? '' : text)
+    .replace(/[ً-ْٰـ]/g, '')   // تشكيل وتطويل
+    .replace(/[أإآٱ]/g, 'ا') // أ إ آ ٱ ← ا
+    .replace(/ى/g, 'ي')                   // ى ← ي
+    .replace(/ة/g, 'ه')                   // ة ← ه
+    .replace(/ؤ/g, 'و')                   // ؤ ← و
+    .replace(/ئ/g, 'ي')                   // ئ ← ي
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function wiStripAl(text) {
+  return text.replace(/^ال/, '');          // «ال» التعريف
+}
+
+// مقارنة تامة بعد التطبيع — لا تطابق جزئي.
+// المنطق السابق كان يقبل أي جزء من الكلمة أو أول ثلاثة أحرف،
+// فيُحتسب حرفٌ واحد إجابةً صحيحة، وتُقبل كلمة مختلفة تبدأ بنفس الأحرف.
+function wiMatches(input, word) {
+  const a = wiNormalize(input);
+  const b = wiNormalize(word);
+  if (!a || !b) return false;
+  return a === b || wiStripAl(a) === wiStripAl(b);
+}
+
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   const items = data;
@@ -22,12 +51,16 @@ function render(runtime, data) {
   function loadWIItem() {
     if (wiState.idx >= wiState.items.length) { runtime.complete(Math.round(wiState.score / wiState.items.length * 5)); return; }
     wiState.hintIdx = 0;
-    document.getElementById('wi-hints').innerHTML = `<div class="hint-chip">💡 ${wiState.items[wiState.idx].hints[0]}</div>`;
+    // مدخل الدرس مولَّد آلياً، فنحتاط لغياب hints بدل الانهيار أمام الصف
+    const hints = wiState.items[wiState.idx].hints;
+    const first = Array.isArray(hints) && hints.length ? hints[0] : '—';
+    document.getElementById('wi-hints').innerHTML = `<div class="hint-chip">💡 ${first}</div>`;
     document.getElementById('wi-input').value = '';
     document.getElementById('wi-feedback').textContent = '';
   }
   function nextWIHint() {
     const item = wiState.items[wiState.idx];
+    if (!Array.isArray(item.hints)) return;
     if (wiState.hintIdx < item.hints.length - 1) {
       wiState.hintIdx++;
       document.getElementById('wi-hints').innerHTML += `<div class="hint-chip">💡 ${item.hints[wiState.hintIdx]}</div>`;
@@ -36,7 +69,7 @@ function render(runtime, data) {
   function checkWI() {
     const item = wiState.items[wiState.idx];
     const input = document.getElementById('wi-input').value.trim();
-    const correct = input && (item.word.includes(input) || input.includes(item.word.substring(0, 3)));
+    const correct = wiMatches(input, item.word);
     document.getElementById('wi-feedback').textContent = correct ? `✅ ${item.word} — ${item.chinese}` : `💡 الجواب: ${item.word}`;
     document.getElementById('wi-feedback').style.color = correct ? 'var(--accent-emerald)' : 'var(--accent-amber)';
     if (correct) { wiState.score++; runtime.reward(); }
