@@ -12,9 +12,10 @@ pass=0; fail=0
 
 # يبني lesson.js صناعياً: الحقل المختبَر فقط، والباقي حدٌّ أدنى سليم
 build() {
-python3 - "$TD/l.js" "$1" <<'PY'
+python3 - "$TD/l.js" "$1" "${2:-}" <<'PY'
 import sys
 field = sys.argv[2]
+dialogue = sys.argv[3] if len(sys.argv) > 3 and sys.argv[3] else '{ speaker: "\u0623", ar: "\u0627\u0644\u062e\u0650\u062f\u0652\u0645\u064e\u0629 \u0648\u064e\u0627\u0644\u0628\u0650\u0637\u064e\u0627\u0642\u064e\u0629 \u0648\u064e\u0627\u0644\u0642\u064e\u0645\u0650\u064a\u0635 \u0648\u064e\u0627\u0644\u0645\u064f\u0634\u0652\u062a\u064e\u0631\u0650\u064a", zh: "x" }'
 tpl = '''const LESSON_DATA = {
   meta: { title: "اختبار" },
   vocab: [
@@ -23,7 +24,7 @@ tpl = '''const LESSON_DATA = {
     { ar: "المُشْتَرِي", zh: "买家", emoji: "🧑", type: "اِسْم · 名词" },
     { ar: "البِطَاقَة", zh: "卡片", emoji: "🏷️", type: "اِسْم · 名词" }
   ],
-  dialogue: [{ speaker: "أ", ar: "الخِدْمَة وَالبِطَاقَة وَالقَمِيص وَالمُشْتَرِي", zh: "x" }],
+  dialogue: [DIALOGUE],
   explain: [{ label: "①", ar: "القُبَّعَة وَالغَالِي", zh: "x" }],
   grammar: [{ type: "conjugation", items: [{ pronoun: "أَنَا", verb: "أَشْتَرِي", zh: "x" }] }],
   exercises: {
@@ -33,12 +34,13 @@ FIELD
   },
   activities: []
 };'''
-open(sys.argv[1], 'w', encoding='utf-8').write(tpl.replace('FIELD', field))
+open(sys.argv[1], 'w', encoding='utf-8').write(
+    tpl.replace('FIELD', field).replace('DIALOGUE', dialogue))
 PY
 }
 
-probe() {   # الاسم · كتلة الحقل · النص المتوقَّع في التقرير
-  build "$2"
+probe() {   # الاسم · كتلة الحقل · النص المتوقَّع في التقرير · [حوار بديل]
+  build "$2" "${4:-}"
   local out; out="$(node "$ROOT/tools/check_activities.js" "$TD/l.js" 2>&1)"
   if echo "$out" | grep -qF "$3"; then
     printf '  \033[32m✓\033[0m %s\n' "$1"; pass=$((pass+1))
@@ -137,6 +139,24 @@ probe "who-am-i: تلميح يحمل جذر الكلمة" \
 probe "who-am-i: كلمة من خارج vocab" \
 '    customWhoAmI: [{word:"السَّيَّارَة",chinese:"车",hints:["أ","ب","ج"]},{word:"الخِدْمَة",chinese:"服务",hints:["أ","ب","ج"]},{word:"البِطَاقَة",chinese:"卡",hints:["أ","ب","ج"]}],' \
 'ليست من vocab الدرس'
+
+# ── sentence-builder (مشتقّ من dialogue عبر bridge.js لا من حقل مولَّد) ──
+NOFIELD='    mcqExtra: [],'
+
+probe "sentence-builder: حوار كله سطور من كلمتين" \
+"$NOFIELD" \
+'ليست تمريناً' \
+'{ speaker: "أ", ar: "أَيْنَ تَعْمَل", zh: "x" }, { speaker: "ب", ar: "مَعَ السَّلَامَة", zh: "y" }'
+
+probe "sentence-builder: حوار فقير — أقل من الحدّ الأدنى (٤)" \
+"$NOFIELD" \
+'الحدّ الأدنى 4' \
+'{ speaker: "أ", ar: "أَيْنَ تَعْمَلُ أَنْتَ", zh: "x" }'
+
+probe "sentence-builder: حوار سليم يمرّ" \
+"$NOFIELD" \
+'بناء الجملة          dialogue                            ✅' \
+'{ speaker: "أ", ar: "مَاذَا تَعْمَلُ أَنْتَ؟", zh: "x" }, { speaker: "ب", ar: "أَعْمَلُ فِي المُسْتَشْفَى.", zh: "y" }, { speaker: "أ", ar: "هَلْ تُحِبُّ عَمَلَكَ؟", zh: "z" }, { speaker: "ب", ar: "نَعَمْ، أُحِبُّ عَمَلِي كَثِيراً.", zh: "w" }'
 
 printf '\n'
 if [ "$fail" -eq 0 ]; then printf '\033[32mالنتيجة: %d نجح · %d فشل\033[0m\n\n' "$pass" "$fail"

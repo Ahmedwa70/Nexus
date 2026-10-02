@@ -58,10 +58,12 @@ const get   = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a
 const MIN = {
   'traffic-light': 4, 'dots-hunter': 2, 'conjugation-ladder': 3,
   'punctuation-editor': 3, 'board-game': 5, 'spot-difference': 3, 'who-am-i': 3,
+  'sentence-builder': 4,
 };
 const IDEAL = {
   'traffic-light': 6, 'dots-hunter': 4, 'conjugation-ladder': 5,
   'punctuation-editor': 5, 'board-game': 8, 'spot-difference': 4, 'who-am-i': 4,
+  'sentence-builder': 8,
 };
 
 const problems = [];
@@ -164,6 +166,22 @@ const RULES = {
       }
     });
     if (d.some(x => x.num === 1)) warn(id, n, 'المربّع 1 نقطة البداية — لن يُسأل عنه');
+  },
+
+  // بناء الجملة لا يقرأ حقلاً مولَّداً، بل يُشتقّ من dialogue في bridge.js.
+  // فالفحص هنا على المخرَج بعد المحوّل: هل أنتج الحوارُ جُملاً صالحة للتمرين؟
+  // حوارٌ كله سطور من كلمتين، أو سطر واحد طويل، يجتاز بقية الفحوص ثم يُعطي
+  // نشاطاً هزيلاً — وهذا ما نلتقطه عند التوليد لا في القاعة.
+  'sentence-builder': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!x.arabic) { bad(id, n, `الجملة #${i + 1}: arabic مفقود`); return; }
+      if (/[.،,؛:!؟«»"'()]/.test(x.arabic))
+        bad(id, n, `الجملة #${i + 1}: ترقيم باقٍ في البطاقات — يكشف موضع الكلمة ("${x.arabic}")`);
+      const w = x.arabic.trim().split(/\s+/).length;
+      if (w < 3) bad(id, n, `الجملة #${i + 1}: ${w} كلمة فقط — ليست تمريناً ("${x.arabic}")`);
+      else if (w > 6) warn(id, n, `الجملة #${i + 1}: ${w} كلمات — فوق النافذة المثلى ٣–٦ ("${x.arabic}")`);
+      if (!x.chinese) warn(id, n, `الجملة #${i + 1}: chinese مفقود`);
+    });
   },
 
   'spot-difference': (d, id, n) => {

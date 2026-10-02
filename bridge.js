@@ -88,9 +88,58 @@
         return { arabic: v.ar, chinese: v.zh, emoji: v.emoji };
       });
     },
+    // ── بناء الجملة ────────────────────────────────────────────
+    // (2026-10-02) كان المحوّل يمرّر سطور الحوار كما هي بلا انتقاء، فينتج:
+    //   • جُملاً من كلمتين — احتمال الصواب العشوائي ٥٠٪، ليست تمريناً
+    //   • جُملاً من تسع كلمات — فوق طاقة المبتدئ
+    //   • ترقيماً ملتصقاً بالبطاقة «طَبِيباً،» — يكشف موضع الكلمة
+    //     فيجتاز الطالب التمرين بقراءة الفاصلة لا بفهم الجملة.
+    // الجُمل موجودة في dialogue أصلاً، والعيب غياب الانتقاء لا غياب البيانات،
+    // فالإصلاح اشتقاق هنا لا حقل جديد في الاسكيما (صفر كلفة توليد).
     'sentence-builder': function(dialogue, config) {
-      return dialogue.map(function(d) {
-        return { arabic: d.ar.replace(/[.!؟,\s]+$/, ''), chinese: d.zh, grammarNote: '' };
+      var SPLIT_AR = /[،,؛:.!؟]+/;                 // فواصل الجملة العربية
+      var SPLIT_ZH = /[，、；：。！？,;:.!?]+/;  // ونظيرتها الصينية
+      var PUNCT    = /[.،,؛:!؟«»"'()]/g;  // ما يُجرَّد من البطاقات
+      var MIN = 3;
+      var want = config.limit || 8;
+
+      // تقطيع السطر المركّب إلى جُمل مستقلة، وتجريدها من الترقيم.
+      // الترجمة الصينية تُقطَّع موازيةً وتُربط بالفهرس فقط عند تطابق العدد،
+      // وإلا رجعنا إلى الترجمة الكاملة — اقتران خاطئ أسوأ من اقتران عام.
+      function harvest(min, max) {
+        var out = [], seen = Object.create(null);
+        dialogue.forEach(function(d) {
+          var parts = String(d.ar || '').split(SPLIT_AR).map(function(s) {
+            return s.replace(PUNCT, ' ').replace(/\s+/g, ' ').trim();
+          }).filter(Boolean);
+          var zhParts = String(d.zh || '').split(SPLIT_ZH).map(function(s) {
+            return s.trim();
+          }).filter(Boolean);
+          var aligned = parts.length > 1 && zhParts.length === parts.length;
+          parts.forEach(function(t, k) {
+            var n = t.split(' ').length;
+            if (n < min || n > max) return;
+            if (seen[t]) return;
+            seen[t] = 1;
+            out.push({ arabic: t, chinese: aligned ? zhParts[k] : d.zh, words: n });
+          });
+        });
+        // تصاعدياً بعدد الكلمات: تدرّج محسوس ٣ → ٤ → ٥ → ٦
+        out.sort(function(a, b) { return a.words - b.words; });
+        return out;
+      }
+
+      // صمامات الأمان — بالتدرّج، فدرسٌ فقير الحوار يجب ألّا يُنتج شاشة فارغة
+      // أمام الصف. النافذة المثلى أولاً، ثم توسيع السقف، ثم رفع الحدّين معاً.
+      // آخر درجة تقبل كل ما في الحوار: جملة من كلمتين أهون من نشاطٍ خاوٍ.
+      // (الفاحص tools/check_activities.js ينبّه إن نزلت الحصيلة عن ٤ جُمل،
+      //  فتُلتقط الدروس الفقيرة عند التوليد لا في القاعة.)
+      var picked = harvest(MIN, 6);
+      if (picked.length < 5) picked = harvest(MIN, 8);
+      if (picked.length < 2) picked = harvest(2, Infinity);
+
+      return picked.slice(0, want).map(function(s) {
+        return { arabic: s.arabic, chinese: s.chinese };
       });
     },
     'progressive-story': function(dialogue, config) {

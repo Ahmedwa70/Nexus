@@ -49,8 +49,19 @@
 
 🔷 TWIN-2 — حد كفاية الحوار (dialogue)
    القاعدة: dialogue ≥ 6 أسطر متسلسلة حقيقية (ويفضل ≤ 12)
-   ✅ dialogue.length ≥ 6 → sentence-builder, progressive-story تسحب سطورها حياً
-   ❌ dialogue.length < 6 → builder والقصة يظهران بصفحات قليلة جداً
+   ✅ dialogue.length ≥ 6 → progressive-story تسحب سطورها حياً
+   ❌ dialogue.length < 6 → القصة تظهر بصفحات قليلة جداً
+
+   ⚠️ العدد وحده لا يكفي لـ sentence-builder:
+   النشاط لا يأخذ السطور كما هي، بل يقطّع كل سطر عند علامات الترقيم
+   (، , ؛ : . ! ؟) إلى جُمل مستقلة، ويجرّدها من الترقيم، ثم ينتقي ما طوله
+   ٣–٦ كلمات. فالمطلوب: أن يُنتج الحوار ٤ جُمل صالحة على الأقل (المثالي ٨).
+   ✅ أسطر فيها جُمل من ٣–٦ كلمات  → بطاقات نظيفة ومتدرّجة
+   ❌ حوار كله «أَيْنَ تَعْمَل» و«مَعَ السَّلَامَة» (كلمتان) → لا شيء ينجو من الانتقاء
+   ❌ سطر واحد طويل بلا ترقيم (١٠ كلمات) → لا يُقطَّع ولا يُنتقى
+   💡 السطر المركّب مكسب لا عيب: «أَعْمَلُ طَبِيباً، مَاذَا تَعْمَلُ أَنْتَ؟»
+      يُنتج جملتين نظيفتين. واكتب الترجمة الصينية مركّبة بالعدد نفسه
+      («我是医生，你做什么工作？») ليُقرن كل شطر بترجمته.
 
 🔷 TWIN-3 — جودة تمارين السحب والفقرة (blanks ←→ answers)
    القاعدة: عدد ___ في paragraph.sentence و challenge.sentence = عدد عناصر answers[] بالضبط
@@ -272,6 +283,11 @@ dialogue: [   // 6 إلى 12 سطراً
   ...
 ]
 ```
+
+> ✍️ **يغذّي نشاط «بناء الجملة» تلقائياً** (مشتقّ، بلا حقل خاص — راجع TWIN-2):  
+> احرص أن يحوي الحوار **٤ جُمل على الأقل (المثالي ٨)** طولها ٣–٦ كلمات،  
+> سواء كانت سطراً كاملاً أو شطراً من سطر مركّب مفصول بفاصلة.  
+> الترجمة الصينية للسطر المركّب تُكتب مركّبة بعدد الأشطر نفسه.
 
 > 🧠 **ذكاء تلقائي**: السطران الأولان عادة تحية (السلام عليكم / وعليكم السلام).  
 > النظام في `renderSpeaking` يتخطاهما تلقائياً ويستخدم أول جملة رئيسية في تدريب الاستماع (المستوى 1).  
@@ -1007,7 +1023,8 @@ activities: []
 
 2. bridge.js يحتوي SOURCE_MAP — محولات لكل نوع
    → T_wheel: vocab[i].ar/zh/emoji → {arabic, chinese, emoji}
-   → T_sentenceBuilder: dialogue[i].ar/zh → {arabic, chinese, grammarNote}
+   → T_sentenceBuilder: dialogue → تقطيع عند الترقيم ثم تجريده ثم انتقاء
+     ما طوله ٣–٦ كلمات، بلا تكرار، مرتَّباً تصاعدياً → {arabic, chinese}
 
 3. عند تشغيل أي لعبة:
    → bridge.js يقرأ ActivityConfig[id].sourceField
@@ -1058,7 +1075,7 @@ activities: []
 | `T_soundMatch` | `{audioText, options:[emoji+word,...], correct:N}` — يولّد خيارات عشوائية |
 | `T_vocabSimple` | `{arabic, chinese}` من vocab (لـ dark-room, speed-reveal) |
 | `T_vocabSingle` | `{arabic}` فقط من vocab (لـ quick-reaction) |
-| `T_sentenceBuilder` | `{arabic, chinese, grammarNote:''}` من dialogue |
+| `T_sentenceBuilder` | `{arabic, chinese}` — جُمل مشتقّة من dialogue بالتقطيع والانتقاء |
 | `T_progressiveStory` | `{speaker, text, chinese}` من dialogue |
 | `T_trafficLight` | `{arabic, type:command/negative, chinese}` — يشتق من grammar patterns |
 | `T_dotsHunter` | `{base, correctLetter, fullWord, reason}` — يكتشف الكلمات المنتهية بـ "ة" من vocab |
