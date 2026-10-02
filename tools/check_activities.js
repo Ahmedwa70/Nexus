@@ -312,6 +312,19 @@ CONFIG.forEach(c => {
     c.sourceField.padEnd(35) + ' ' + status);
 });
 
+// ── قاعدة Twin-File: activities يبقى فارغاً إلزامياً ─────────────
+// المحرّك يبني الأنشطة من ActivityConfig + SOURCE_MAP، فأي عنصر هنا محتوًى
+// مدفون في الدرس يخالف فصل «الدرس = ماذا / المحرّك = كيف».
+// (2026-10-02) كانت هذه القاعدة مكتوبة في LESSON_SCHEMA.md فقط، ومنسوخة في
+// validators.js الميت الذي لم يكن يعمل — أي أنها لم تكن مطبَّقة إطلاقاً.
+// نُقلت إلى البوّابة الحيّة عند حذف ذلك الملف.
+if (!Array.isArray(LESSON.activities)) {
+  bad(0, 'بنية الدرس', 'الحقل activities مفقود أو ليس مصفوفة — القاعدة: activities: []');
+} else if (LESSON.activities.length) {
+  bad(0, 'بنية الدرس',
+      `activities فيه ${LESSON.activities.length} عنصراً — يجب أن يبقى فارغاً: activities: []`);
+}
+
 console.log('  ' + line + '\n');
 
 if (problems.length) {
@@ -337,8 +350,13 @@ console.log('═'.repeat(78));
 if (problems.length === 0) {
   console.log(`\n  ✅ الأنشطة الـ${CONFIG.length} كلها تجد بياناتها وتحترم قيود واجهاتها\n`);
 } else {
-  const broken = new Set(problems.map(p => p.id)).size;
-  console.log(`\n  ⛔ ${broken} نشاطاً من ${CONFIG.length} لن يعمل كما ينبغي`);
+  // المعرّف 0 ليس نشاطاً بل مخالفة بنية في الدرس — يُحسب على حدة
+  const brokenIds = new Set(problems.filter(p => p.id !== 0).map(p => p.id));
+  const structural = problems.some(p => p.id === 0);
+  const parts = [];
+  if (brokenIds.size) parts.push(`${brokenIds.size} نشاطاً من ${CONFIG.length} لن يعمل كما ينبغي`);
+  if (structural)     parts.push('بنية الدرس تخالف قاعدة Twin-File');
+  console.log(`\n  ⛔ ${parts.join(' · ')}`);
   console.log(`     أصلح الدرس ثم أعِد التشغيل — لا تنشره هكذا\n`);
 }
 console.log('═'.repeat(78) + '\n');
