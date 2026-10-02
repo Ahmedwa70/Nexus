@@ -21,6 +21,13 @@
     return arr;
   }
 
+  // (2026-10-02) حُذفت محوّلات: traffic-light · dots-hunter · conjugation-ladder
+  // punctuation-editor · board-game · spot-difference.
+  // كانت تشتقّ بياناتها من vocab/grammar/explain أيام كان محتواها مدفوناً في
+  // activity.js. وبعد أن صارت تقرأ حقولها الخاصة من lesson.js، صارت تلك
+  // المحوّلات تُشوّه ما تمرّره: ثلاثة تُفرغ المصفوفة، وثلاثة تُبقي عناصرها
+  // وتُفرغ حقولها — وهذا أخطر لأنه يمرّ صامتاً.
+  // الآن تسقط إلى 'direct' فتصل البيانات كما كتبها الذكاء الاصطناعي.
   var SOURCE_MAP = {
     'direct': function(data, config) {
       return config.limit ? data.slice(0, config.limit) : data;
@@ -81,92 +88,64 @@
         return { arabic: v.ar, chinese: v.zh, emoji: v.emoji };
       });
     },
+    // ── بناء الجملة ────────────────────────────────────────────
+    // (2026-10-02) كان المحوّل يمرّر سطور الحوار كما هي بلا انتقاء، فينتج:
+    //   • جُملاً من كلمتين — احتمال الصواب العشوائي ٥٠٪، ليست تمريناً
+    //   • جُملاً من تسع كلمات — فوق طاقة المبتدئ
+    //   • ترقيماً ملتصقاً بالبطاقة «طَبِيباً،» — يكشف موضع الكلمة
+    //     فيجتاز الطالب التمرين بقراءة الفاصلة لا بفهم الجملة.
+    // الجُمل موجودة في dialogue أصلاً، والعيب غياب الانتقاء لا غياب البيانات،
+    // فالإصلاح اشتقاق هنا لا حقل جديد في الاسكيما (صفر كلفة توليد).
     'sentence-builder': function(dialogue, config) {
-      return dialogue.map(function(d) {
-        return { arabic: d.ar.replace(/[.!؟,\s]+$/, ''), chinese: d.zh, grammarNote: '' };
+      var SPLIT_AR = /[،,؛:.!؟]+/;                 // فواصل الجملة العربية
+      var SPLIT_ZH = /[，、；：。！？,;:.!?]+/;  // ونظيرتها الصينية
+      var PUNCT    = /[.،,؛:!؟«»"'()]/g;  // ما يُجرَّد من البطاقات
+      var MIN = 3;
+      var want = config.limit || 8;
+
+      // تقطيع السطر المركّب إلى جُمل مستقلة، وتجريدها من الترقيم.
+      // الترجمة الصينية تُقطَّع موازيةً وتُربط بالفهرس فقط عند تطابق العدد،
+      // وإلا رجعنا إلى الترجمة الكاملة — اقتران خاطئ أسوأ من اقتران عام.
+      function harvest(min, max) {
+        var out = [], seen = Object.create(null);
+        dialogue.forEach(function(d) {
+          var parts = String(d.ar || '').split(SPLIT_AR).map(function(s) {
+            return s.replace(PUNCT, ' ').replace(/\s+/g, ' ').trim();
+          }).filter(Boolean);
+          var zhParts = String(d.zh || '').split(SPLIT_ZH).map(function(s) {
+            return s.trim();
+          }).filter(Boolean);
+          var aligned = parts.length > 1 && zhParts.length === parts.length;
+          parts.forEach(function(t, k) {
+            var n = t.split(' ').length;
+            if (n < min || n > max) return;
+            if (seen[t]) return;
+            seen[t] = 1;
+            out.push({ arabic: t, chinese: aligned ? zhParts[k] : d.zh, words: n });
+          });
+        });
+        // تصاعدياً بعدد الكلمات: تدرّج محسوس ٣ → ٤ → ٥ → ٦
+        out.sort(function(a, b) { return a.words - b.words; });
+        return out;
+      }
+
+      // صمامات الأمان — بالتدرّج، فدرسٌ فقير الحوار يجب ألّا يُنتج شاشة فارغة
+      // أمام الصف. النافذة المثلى أولاً، ثم توسيع السقف، ثم رفع الحدّين معاً.
+      // آخر درجة تقبل كل ما في الحوار: جملة من كلمتين أهون من نشاطٍ خاوٍ.
+      // (الفاحص tools/check_activities.js ينبّه إن نزلت الحصيلة عن ٤ جُمل،
+      //  فتُلتقط الدروس الفقيرة عند التوليد لا في القاعة.)
+      var picked = harvest(MIN, 6);
+      if (picked.length < 5) picked = harvest(MIN, 8);
+      if (picked.length < 2) picked = harvest(2, Infinity);
+
+      return picked.slice(0, want).map(function(s) {
+        return { arabic: s.arabic, chinese: s.chinese };
       });
     },
     'progressive-story': function(dialogue, config) {
       return dialogue.map(function(d) {
         return { speaker: d.speaker, text: d.ar, chinese: d.zh };
       });
-    },
-    'traffic-light': function(grammar, config) {
-      return (Array.isArray(grammar) ? grammar : []).filter(function(g) {
-        return g.type === 'pattern';
-      }).map(function(g) {
-        return {
-          arabic: g.ar,
-          type: g.ar && g.ar.indexOf('لَا') !== -1 ? 'negative' : 'command',
-          chinese: g.zh
-        };
-      });
-    },
-    'dots-hunter': function(vocab, config) {
-      var limit = config.limit || 6;
-      return (Array.isArray(vocab) ? vocab : []).filter(function(v) {
-        return v.ar && v.ar.slice(-1) === 'ة';
-      }).slice(0, limit).map(function(v) {
-        var base = v.ar.slice(0, -1);
-        return {
-          base: base + '_',
-          correctLetter: 'ة',
-          fullWord: v.ar,
-          reason: v.type + ' — ' + v.zh
-        };
-      });
-    },
-    'conjugation-ladder': function(grammar, config) {
-      if (!Array.isArray(grammar)) return [];
-      var found = null;
-      for (var ci = 0; ci < grammar.length; ci++) {
-        if (grammar[ci].type === 'conjugation') { found = grammar[ci]; break; }
-      }
-      if (found && Array.isArray(found.items)) {
-        return found.items.map(function(item) {
-          return { past: '', present: item.verb };
-        });
-      }
-      return (config.limit ? grammar.slice(0, config.limit) : grammar).map(function(g) {
-        return { past: '', present: g.ar || '' };
-      });
-    },
-    'punctuation-editor': function(mcq, config) {
-      if (!Array.isArray(mcq)) return [];
-      return mcq.slice(0, config.limit || 5).map(function(q) {
-        var text = q.question || '';
-        var mark = '.';
-        if (text.indexOf('؟') !== -1) mark = '؟';
-        else if (text.indexOf('كَم') !== -1 || text.indexOf('أَي') !== -1 || text.indexOf('هَل') !== -1) mark = '؟';
-        else if (text.indexOf('!') !== -1) mark = '!';
-        return { text: text, correctMark: mark };
-      });
-    },
-    'board-game': function(explain, config) {
-      if (!Array.isArray(explain)) return [];
-      return explain.slice(0, config.limit || 8).map(function(ex, i) {
-        var q = ex.ar || '';
-        if (q.length > 60) q = q.slice(0, 60) + '...؟';
-        else if (q) q = q + '؟';
-        var label = (ex.label || '').replace(/^[①②③④⑤⑥⑦⑧]\s*/, '').trim();
-        return { num: (i + 1) * 3, question: q, answer: label, type: 'vocab' };
-      });
-    },
-    'spot-difference': function(vocab, config) {
-      if (!Array.isArray(vocab)) return [];
-      var limit = config.limit || 4;
-      var pairs = [];
-      for (var si = 0; si < Math.min(vocab.length - 1, limit * 2); si += 2) {
-        var a = vocab[si], b = vocab[si + 1];
-        if (a && b && a.ar && b.ar) {
-          pairs.push({
-            sentenceA: a.ar,
-            sentenceB: b.ar,
-            keyword: a.ar + ' ≠ ' + b.ar
-          });
-        }
-      }
-      return pairs;
     },
     'hidden-reveal': function(data, config) {
       return Array.isArray(data) ? data.slice(0, config.limit || data.length) : [];

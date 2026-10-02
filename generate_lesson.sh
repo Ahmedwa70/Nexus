@@ -20,6 +20,7 @@ FINAL="$SCRIPT_DIR/data/lesson.js"
 BACKUP="$SCRIPT_DIR/data/lesson_backup.js"
 SANITIZE="$SCRIPT_DIR/sanitize_lesson.js"
 VALIDATE="$SCRIPT_DIR/validate_lesson.js"
+CROSSCHECK="$SCRIPT_DIR/tools/check_activities.js"
 
 line() { echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"; }
 
@@ -62,7 +63,7 @@ echo -e "  ${BOLD}الناتج:${NC}  data/lesson.js"
 echo ""
 
 # ── STEP 1: Sanitize ──────────────────────────────────────────────
-echo -e "  ${BOLD}[1/3]${NC} 🧹 تنظيف الملف..."
+echo -e "  ${BOLD}[1/4]${NC} 🧹 تنظيف الملف..."
 echo ""
 
 node "$SANITIZE" "$RAW" "$CLEAN"
@@ -79,7 +80,7 @@ if [ $SANITIZE_EXIT -ne 0 ]; then
 fi
 
 # ── STEP 2: Validate ──────────────────────────────────────────────
-echo -e "  ${BOLD}[2/3]${NC} ✅ التحقق من البنية والمحتوى..."
+echo -e "  ${BOLD}[2/4]${NC} ✅ التحقق من البنية والمحتوى..."
 echo ""
 
 node "$VALIDATE" "$CLEAN"
@@ -95,8 +96,31 @@ if [ $VALIDATE_EXIT -ne 0 ]; then
     exit 1
 fi
 
-# ── STEP 3: Publish ───────────────────────────────────────────────
-echo -e "  ${BOLD}[3/3]${NC} 📤 نشر الدرس..."
+# ── STEP 3: Cross-check activities ───────────────────────────────
+# المدقّق يفحص lesson.js معزولاً ولا يعرف activity.js. فدرسٌ ينقصه
+# حقل نشاط يمرّ عنده «ممتازاً» ثم يفتح النشاط فارغاً أمام الصف.
+echo -e "  ${BOLD}[3/4]${NC} 🔗 الفحص التقاطعي للأنشطة الـ22..."
+echo ""
+
+if [ -f "$CROSSCHECK" ]; then
+    node "$CROSSCHECK" "$CLEAN"
+    CROSS_EXIT=$?
+    echo ""
+    if [ $CROSS_EXIT -ne 0 ]; then
+        line
+        echo -e "  ${RED}${BOLD}⛔ توقف — أنشطة لن تعمل بهذا الدرس${NC}"
+        echo -e "  ${YELLOW}→ أضف الحقول الناقصة إلى data/lesson_raw.js ثم أعِد التشغيل${NC}"
+        echo ""
+        rm -f "$CLEAN"
+        exit 1
+    fi
+else
+    echo -e "  ${YELLOW}⚠️  tools/check_activities.js غير موجود — تُخطّى الفحص التقاطعي${NC}"
+    echo ""
+fi
+
+# ── STEP 4: Publish ───────────────────────────────────────────────
+echo -e "  ${BOLD}[4/4]${NC} 📤 نشر الدرس..."
 echo ""
 
 if [ -f "$FINAL" ]; then
