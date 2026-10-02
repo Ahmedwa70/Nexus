@@ -41,6 +41,16 @@ const norm  = t => strip(t).replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').re
 const bare  = w => norm(w).replace(/^ال/, '');
 const get   = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
 
+// الحدّ الأدنى لكل نشاط — مطابق لأسطر «عند التعذّر» في LESSON_SCHEMA.md
+const MIN = {
+  'traffic-light': 4, 'dots-hunter': 2, 'conjugation-ladder': 3,
+  'punctuation-editor': 3, 'board-game': 5, 'spot-difference': 3, 'who-am-i': 3,
+};
+const IDEAL = {
+  'traffic-light': 6, 'dots-hunter': 4, 'conjugation-ladder': 5,
+  'punctuation-editor': 5, 'board-game': 8, 'spot-difference': 4, 'who-am-i': 4,
+};
+
 const problems = [];
 const notes = [];
 function bad(id, name, msg)  { problems.push({ id, name, msg }); }
@@ -74,7 +84,7 @@ const RULES = {
       if (x.fullWord.slice(-1) !== x.correctLetter)
         bad(id, n, `العنصر #${i + 1}: آخر حرف في fullWord ("${x.fullWord.slice(-1)}") يخالف correctLetter ("${x.correctLetter}")`);
       if (!x.reason) warn(id, n, `العنصر #${i + 1}: reason مفقود`);
-      if (!VOCAB.has(bare(x.fullWord))) warn(id, n, `"${x.fullWord}" ليست من vocab الدرس`);
+      // تمرين إملائي لا مفرداتي: الكلمة من أيّ نصّ في الدرس، لا من vocab وحدها
     });
   },
 
@@ -218,6 +228,10 @@ CONFIG.forEach(c => {
     status = '🔴 فارغ';
   } else {
     const before = problems.length;
+    if (MIN[c.type] && value.length < MIN[c.type])
+      bad(c.id, name, `${value.length} عنصراً فقط — الحدّ الأدنى ${MIN[c.type]} (المثالي ${IDEAL[c.type]})`);
+    else if (IDEAL[c.type] && value.length < IDEAL[c.type])
+      warn(c.id, name, `${value.length} عنصراً — المثالي ${IDEAL[c.type]}`);
     if (RULES[c.type]) RULES[c.type](value, c.id, name);
     status = problems.length === before ? `✅ ${value.length} عنصراً` : '⚠️ مخالفة قيد';
     if (problems.length === before) okCount++;

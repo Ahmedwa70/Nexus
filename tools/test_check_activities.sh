@@ -65,5 +65,17 @@ probe "spot-difference: اختلاف في أكثر من كلمة" \
 '    customSpotDifference: [{sentenceA:"آكُلُ السَّمَكَ فِي الغَدَاء", sentenceB:"أَشْرَبُ الشَّايَ فِي العَشَاء", keyword:"ك"}],' \
 'المطلوب كلمة واحدة بالضبط'
 
+probe "dots-hunter: أقل من الحدّ الأدنى (٢)" \
+'    customDotsHunter: [{base:"الخِدْمَ", correctLetter:"ة", fullWord:"الخِدْمَة", reason:"ر"}],' \
+'الحدّ الأدنى 2'
+
+probe "traffic-light: أقل من الحدّ الأدنى (٤)" \
+'    customTrafficLight: [{arabic:"كُلْ", type:"command", chinese:"吃"},{arabic:"لَا تَأْكُلْ", type:"negative", chinese:"别"}],' \
+'الحدّ الأدنى 4'
+
+probe "board-game: أقل من الحدّ الأدنى (٥)" \
+'    customBoardGame: [{num:3,question:"س",answer:"ج",type:"vocab"},{num:7,question:"س",answer:"ج",type:"vocab"},{num:11,question:"س",answer:"ج",type:"vocab"}],' \
+'الحدّ الأدنى 5'
+
 printf '\nالنتيجة: %d نجح · %d فشل\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
