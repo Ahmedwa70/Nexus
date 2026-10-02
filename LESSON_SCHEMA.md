@@ -730,6 +730,118 @@ customHealthLetter: [   // اختياري
 ]
 ```
 
+##### customTrafficLight (id:11) — 🔴 مطلوب
+```js
+customTrafficLight: [   // 6 جُمَل — مطلوب
+  { arabic: STRING, type: "command" | "negative", chinese: STRING }
+]
+```
+**قيد من الواجهة:** `type` إمّا `"command"` أو `"negative"` — لا ثالث لهما (الزرّان 🟢 أمر · 🔴 نهي).
+
+```
+١ · ٦ جُمَل: ٣ أمر + ٣ نهي بالتساوي
+٢ · الأمر  = فِعْل أَمْر صريح      (اُكْتُبْ · كُلْ · اِشْرَبْ)
+٣ · النهي = لَا + مُضَارِع مَجْزُوم (لَا تَأْكُلْ · لَا تَشْرَبْ)
+٤ · من مفردات الدرس وموضوعه حصراً
+٥ · كل جملة ٣-٦ كلمات، مشكّلة بالكامل
+٦ · chinese تُبيّن النوع: （命令）للأمر · （禁止）للنهي
+```
+> ❌ **خطأ شائع:** جملة خبرية مثل «أُفَضِّلُ الشَّايَ» ليست أمراً ولا نهياً — لا تضعها.
+
+##### customDotsHunter (id:15) — 🔴 مطلوب
+```js
+customDotsHunter: [   // 4-6 كلمات — مطلوب
+  { base: STRING, correctLetter: "ي" | "ى" | "ة", fullWord: STRING, reason: STRING }
+]
+```
+**قيد صارم من الواجهة:** الأزرار **ثلاثة فقط** — `ي` و `ى` و `ة`. أي حرف آخر يجعل اللغز بلا إجابة.
+
+```
+١ · fullWord من vocab الدرس، وتنتهي بأحد الحروف الثلاثة
+٢ · base = fullWord بعد حذف حرفها الأخير (الواجهة تضع ___ مكانه)
+٣ · correctLetter = الحرف المحذوف — ويجب أن يكون ي أو ى أو ة
+٤ · reason = سبب إملائي موجز بالعربية (لماذا هذا الحرف لا غيره)
+٥ · نوِّع الحروف الثلاثة ما أمكن، ولا تجعلها كلها ة
+```
+> **مثال للشكل:** `{ base:"السَّلَطَ", correctLetter:"ة", fullWord:"السَّلَطَة", reason:"اِسْم مُؤَنَّث يَنْتَهِي بِالتَّاء المَرْبُوطَة" }`
+
+##### customConjugationLadder (id:16) — 🔴 مطلوب
+```js
+customConjugationLadder: [   // 5-6 أزواج — مطلوب
+  { past: STRING, present: STRING }
+]
+```
+**كيف يعمل:** الواجهة تعرض `past` ويكتب الطالب `present`. فالحقلان **إلزاميان ومملوءان** — حقل ماضٍ فارغ يُفرغ التمرين من معناه.
+
+```
+١ · الفعل الرئيسي في الدرس نفسه (نفس فعل grammar.conjugation)
+٢ · كل زوج لضمير واحد: الماضي والمضارع لنفس الضمير
+      أَكَلْتُ → آكُلُ      أَكَلْتَ → تَأْكُلُ      أَكَلَ → يَأْكُلُ
+٣ · 5-6 أزواج بترتيب الضمائر: أَنَا · أَنْتَ · أَنْتِ · هُوَ · هِيَ · نَحْنُ
+٤ · مشكّلان بالكامل
+٥ · ❌ ممنوع ترك past فارغاً أو تكرار نفس الزوج
+```
+
+##### customPunctuation (id:17) — 🔴 مطلوب
+```js
+customPunctuation: [   // 5 جُمَل — مطلوب
+  { text: STRING, correctMark: "." | "؟" | "!" | "،" | "؛" }
+]
+```
+**قيد من الواجهة:** الرموز المعروضة ستة؛ استعمل العربية منها فقط: `.` `؟` `!` `،` `؛`
+
+```
+١ · ❌ ❌ الأهم: text يجب ألّا تحتوي العلامة أصلاً
+      النص ينتهي عند آخر كلمة، والواجهة تضع مكان العلامة
+      خطأ: "أَيْنَ تَأْكُلُ؟"   ✅ صواب: "أَيْنَ تَأْكُلُ"
+٢ · ٥ جُمَل من موضوع الدرس ومفرداته
+٣ · نوِّع: استفهام واحد على الأقل (؟)، وتعجّب واحد (!)، والباقي خبر (.)
+٤ · القرينة داخل الجملة تكفي لتحديد العلامة
+      استفهام → تبدأ بـ هَلْ · أَيْنَ · مَاذَا · كَمْ · مَا
+      تعجّب   → مَا أَجْمَلَ · مَا أَلَذَّ
+٥ · مشكّلة بالكامل
+```
+> **لماذا القاعدة ١:** إن بقيت العلامة في النص، رآها الطالب ونقلها — فبطل التمرين.
+
+##### customBoardGame (id:20) — 🔴 مطلوب
+```js
+customBoardGame: [   // 8 مربّعات — مطلوب
+  { num: NUMBER, question: STRING, answer: STRING, type: "vocab"|"command"|"spelling"|"punctuation"|"conjugation" }
+]
+```
+**قيود من الواجهة:** اللوحة **٣٠ مربّعاً**، واللاعب يبدأ من ١ ويتقدّم بالنرد (١-٦).
+
+```
+١ · num عدد صحيح بين ٣ و٢٩، تصاعدي، بلا تكرار، موزّع على اللوحة
+      مثال جيد: 3 · 7 · 10 · 14 · 18 · 22 · 25 · 29
+٢ · ٨ مربّعات
+٣ · question قصيرة ومكتملة، من محتوى الدرس
+٤ · answer كلمة أو كلمتان — بدون تشكيل
+      ولقبول أكثر من صياغة افصل بـ / مثل: "السمك/سمك"
+٥ · type من الخمسة المسموحة فقط — وزّعها على أنواع الأسئلة
+٦ · ❌ ممنوع سؤال يتجاوز سطراً، فالمربّع ضيّق
+```
+
+##### customSpotDifference (id:21) — 🔴 مطلوب
+```js
+customSpotDifference: [   // 4 أزواج — مطلوب
+  { sentenceA: STRING, sentenceB: STRING, keyword: STRING }
+]
+```
+```
+١ · الجملتان **جملتان كاملتان**، لا مفردتان
+٢ · متطابقتان تماماً إلّا في **كلمة واحدة** فقط
+٣ · keyword بالصيغة: "كلمة A ≠ كلمة B"
+٤ · ٤ أزواج، من موضوع الدرس ومفرداته
+٥ · الكلمتان المختلفتان من vocab الدرس ما أمكن
+٦ · مشكّلتان بالكامل
+```
+> **مثال للشكل:**
+> ```js
+> { sentenceA:"آكُلُ السَّمَكَ فِي الغَدَاء", sentenceB:"آكُلُ الدَّجَاجَ فِي الغَدَاء",
+>   keyword:"السَّمَك ≠ الدَّجَاج" }
+> ```
+
 ## 📋 القسم 10 — `smartFeedback`
 
 ```js
@@ -804,17 +916,17 @@ activities: []
 | 8 | wechat | `exercises.customWechat` | `LESSON_DATA.exercises.customWechat` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
 | 9 | who-am-i | `exercises.customWhoAmI` | `LESSON_DATA.exercises.customWhoAmI` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
 | 10 | swipe-quiz | `exercises.trueFalse` | `LESSON_DATA.exercises.trueFalse` |
-| 11 | traffic-light | `grammar` | `LESSON_DATA.grammar` (محول تلقائي) |
+| 11 | traffic-light | `exercises.customTrafficLight` | 🔴 مطلوب — لا احتياطي |
 | 12 | speed-reveal | `vocab` | `LESSON_DATA.vocab` |
 | 13 | quick-reaction | `vocab` | `LESSON_DATA.vocab` |
 | 14 | mini-maze | `exercises.mcq` | `LESSON_DATA.exercises.mcq` |
-| 15 | dots-hunter | `vocab` | `LESSON_DATA.vocab` (محول تلقائي) |
-| 16 | conjugation-ladder | `grammar` | `LESSON_DATA.grammar` (محول تلقائي) |
-| 17 | punctuation-editor | `exercises.mcq` | `LESSON_DATA.exercises.mcq` (محول تلقائي) |
+| 15 | dots-hunter | `exercises.customDotsHunter` | 🔴 مطلوب — لا احتياطي |
+| 16 | conjugation-ladder | `exercises.customConjugationLadder` | 🔴 مطلوب — لا احتياطي |
+| 17 | punctuation-editor | `exercises.customPunctuation` | 🔴 مطلوب — لا احتياطي |
 | 18 | young-doctor | `exercises.customYoungDoctor` | `LESSON_DATA.exercises.customYoungDoctor` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
 | 19 | health-letter | `exercises.customHealthLetter` | `LESSON_DATA.exercises.customHealthLetter` (⚠️ لا احتياطي — الحقل مفقود = نشاط فارغ) |
-| 20 | board-game | `explain` | `LESSON_DATA.explain` (محول تلقائي) |
-| 21 | spot-difference | `vocab` | `LESSON_DATA.vocab` (محول تلقائي) |
+| 20 | board-game | `exercises.customBoardGame` | 🔴 مطلوب — لا احتياطي |
+| 21 | spot-difference | `exercises.customSpotDifference` | 🔴 مطلوب — لا احتياطي |
 | 22 | progressive-story | `dialogue` | `LESSON_DATA.dialogue` |
 
 ### تفاصيل transformers لكل sourceField (في `bridge.js`)
@@ -911,7 +1023,10 @@ activities: []
 □ dialogue.length ≥ 6 (TWIN-2 — dialogue كافٍ لألعاب الحوار)
 □ paragraph.sentence + challenge.sentence: عدد ___ = answers.length بالضبط (TWIN-3)
 □ vocab[0..3] = صحيحة selectWords، vocab[4..7] = خاطئة (TWIN-4)
-□ exercises.customWhoAmI موجود — وإلا فتح نشاط «مَن أنا؟» فارغاً (لا احتياطي)
+□ الحقول السبعة المخصصة موجودة — customTrafficLight · customDotsHunter
+   customConjugationLadder · customPunctuation · customBoardGame
+   customSpotDifference · customWhoAmI
+   ⚠️ أيّ غائب = نشاطه يفتح فارغاً. لا توجد بيانات احتياطية في activity.js
 ```
 
 ## 🤖 البرومبت الجاهز لإرساله لأي AI
@@ -958,6 +1073,32 @@ activities: []
 - جميع الإجابات (answer/answers/data-answer) بدون تشكيل
 
 ━━━ حقول exercises المخصصة (داخل القسم 9) ━━━
+🔴 سبعة حقول مطلوبة. غياب أيٍّ منها = نشاط معطّل، ولا يوجد احتياطي.
+   راجع القسم U في LESSON_SCHEMA.md لقواعد كلٍّ منها بالتفصيل.
+
+🔴 exercises.customTrafficLight — 6 جُمَل: { arabic, type, chinese }
+   type = "command" أو "negative" فقط (لا ثالث)
+   3 أمر (فِعْل أَمْر) + 3 نهي (لَا + مُضَارِع مَجْزُوم) — لا جُمَل خبرية
+
+🔴 exercises.customDotsHunter — 4-6: { base, correctLetter, fullWord, reason }
+   ⚠️ correctLetter من ثلاثة فقط: ي أو ى أو ة — الأزرار ثلاثة لا غير
+   base = الكلمة بعد حذف حرفها الأخير
+
+🔴 exercises.customConjugationLadder — 5-6: { past, present }
+   زوج لكل ضمير من الفعل الرئيسي: أَكَلْتُ → آكُلُ
+   ❌ ممنوع ترك past فارغاً
+
+🔴 exercises.customPunctuation — 5: { text, correctMark }
+   ⚠️ الأهم: text بلا العلامة إطلاقاً — "أَيْنَ تَأْكُلُ" لا "أَيْنَ تَأْكُلُ؟"
+   correctMark من: . ؟ ! ، ؛
+
+🔴 exercises.customBoardGame — 8: { num, question, answer, type }
+   num بين 3 و29 تصاعدي بلا تكرار · answer بلا تشكيل · سؤال سطر واحد
+   type من: vocab · command · spelling · punctuation · conjugation
+
+🔴 exercises.customSpotDifference — 4: { sentenceA, sentenceB, keyword }
+   جملتان كاملتان متطابقتان إلّا في كلمة واحدة · keyword = "كلمة ≠ كلمة"
+
 🔴 exercises.customWhoAmI — مطلوب، 4-5 ألغاز:
    { word, chinese, hints: [3 تلميحات] }
    ١ · word من vocab الدرس حرفياً
@@ -1003,6 +1144,12 @@ activities: []
 □ fillBlanks: كل sentence تحتوي ___ واحد → answer واحد
 □ exercises.customWhoAmI موجود — 4-5 ألغاز، كل لغز 3 تلميحات
 □ customWhoAmI[].word موجودة في vocab — ولا تلميح يحمل الكلمة أو جذرها
+□ customTrafficLight موجود — 6 جُمَل، 3 أمر + 3 نهي، type صحيح
+□ customDotsHunter موجود — correctLetter من ي/ى/ة فقط، وbase = الكلمة ناقصةَ حرفها الأخير
+□ customConjugationLadder موجود — 5-6 أزواج، ولا past فارغ
+□ customPunctuation موجود — 5 جُمَل، ولا جملة تحمل علامتها
+□ customBoardGame موجود — 8 مربّعات، num بين 3 و29 تصاعدي بلا تكرار
+□ customSpotDifference موجود — 4 أزواج، كل زوج يختلف بكلمة واحدة فقط
 ```
 
 ### 🟡 QUALITY (جودة بيداغوجية)
