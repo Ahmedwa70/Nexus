@@ -681,26 +681,47 @@ patternFill: {
 
 **⚠️ تحذير صارم — هذه الحقول تضاف إلى `exercises` (القسم 9)، وليس إلى `activities` (القسم 11). `activities: []` يظل فارغاً إلزامياً.**
 
-##### customHiddenReveal (id:5)
+##### customHiddenReveal (id:5) — 🔴 مطلوب
 ```js
-customHiddenReveal: [   // 4-6 عناصر — اختياري
+customHiddenReveal: [   // 4-6 عناصر — مطلوب
   {
-    coveredImage: EMOJI,    // إيموجي يغطي الكلمة
-    word: STRING,           // الكلمة العربية
-    chinese: STRING,        // الترجمة الصينية
-    hints: [STRING, STRING] // تلميحان
+    coveredImage: EMOJI,    // إيموجي يغطّي الكلمة
+    word:         STRING,   // الكلمة العربية مشكّلة
+    chinese:      STRING,   // الترجمة الصينية
+    hints:        [STRING, STRING, STRING]
   }
 ]
 ```
+**المصدر:** `vocab` — وفضّل الأسماء المحسوسة.
+```
+١ · 4-6 عناصر، كلماتها من vocab ولا تتكرر
+٢ · coveredImage إيموجي واحد يناسب الكلمة
+٣ · ثلاثة تلميحات من العام إلى الخاص
+٤ · ❌ ممنوع ذكر الكلمة أو جذرها في تلميحاتها
+```
+**عند التعذّر:** الحدّ الأدنى ثلاثة عناصر.
 
-##### customWechat (id:8)
+
+##### customWechat (id:8) — 🔴 مطلوب
 ```js
-customWechat: [   // تسلسل حوار — اختياري
-  { from: "other", text: STRING, chinese: STRING, delay: NUMBER },
-  { from: "choices", choices: [STRING, STRING, STRING], correctIndex: NUMBER },
-  ...
+customWechat: [   // تسلسل حوار — مطلوب
+  { from: "other",   text: STRING, chinese: STRING, delay: NUMBER },
+  { from: "choices", choices: [STRING, STRING, STRING], correctIndex: NUMBER }
 ]
 ```
+**قيد من الواجهة:** `from` إمّا `"other"` أو `"choices"` — لا ثالث.
+`correctIndex` فهرس داخل `choices` يبدأ من الصفر.
+
+**المصدر:** موضوع الدرس ومفرداته — الحوار مؤلَّف لا منقول.
+```
+١ · يبدأ بـ other، ثم choices، بالتناوب
+٢ · ثلاثة أسئلة اختيار على الأقل
+٣ · ثلاثة خيارات لكل سؤال: واحد صحيح واثنان خاطئان بوضوح
+٤ · delay = 800 لرسائل other
+٥ · لغة الحوار من مستوى الدرس
+```
+**عند التعذّر:** الحدّ الأدنى سؤالا اختيار مع رسالتَي other.
+
 
 ##### customWhoAmI (id:9) — 🔴 مطلوب
 ```js
@@ -744,19 +765,50 @@ customWhoAmI: [   // 4-5 ألغاز — مطلوب
 > لذلك جاء التلميح الثالث أعلاه بـ «الغَابَة» و«الشَّاطِئ» — مفردتان من الدرس
 > تَضَعان الكلمة في سياقها دون أن تلمسا جذرها.
 
-##### customYoungDoctor (id:18)
+##### customYoungDoctor (id:18) — 🔴 مطلوب
 ```js
-customYoungDoctor: [   // 2-3 مرضى — اختياري
+customYoungDoctor: [   // 2-3 حالات — مطلوب
   { name: STRING, age: NUMBER, problems: STRING, expectedTips: [STRING, STRING, STRING] }
 ]
 ```
+**كيف يعمل:** تُعرض الحالة، ويكتب الطالب **ثلاث نصائح بصيغة الأمر أو النهي**،
+ثم تُعرض `expectedTips` للمقارنة. فهو تمرين **إنتاج** للأمر والنهي.
 
-##### customHealthLetter (id:19)
+**المصدر:** موضوع الدرس ومفرداته — الحالات مؤلَّفة لا منقولة.
+```
+١ · 2-3 حالات
+٢ · name = اسم عربي · age = رقم
+٣ · problems = وصف المشكلة في سطر واحد، من موضوع الدرس
+٤ · expectedTips = ثلاث نصائح، كلٌّ بصيغة أمر أو نهي صريحة
+      (كُلْ · قَلِّلْ · لَا تَشْتَرِ · اِسْأَلْ)
+٥ · النصائح تستعمل مفردات الدرس
+```
+**عند التعذّر:** الحدّ الأدنى حالتان.
+
+> ⚠️ **ملاحظة معلومة:** عنوان النشاط ثابت في الواجهة «🧑‍⚕️ الطبيب الصغير».
+> فإن كان الدرس بعيداً عن الصحة، صُغ الحالة بزاوية صحية من موضوعه
+> (في درس التسوّق: مَن يُنفق كثيراً · مَن لا يسأل عن السعر).
+
+
+##### customHealthLetter (id:19) — 🔴 مطلوب
 ```js
-customHealthLetter: [   // اختياري
+customHealthLetter: [   // موجّه واحد — مطلوب
   { prompt_ar: STRING, prompt_zh: STRING }
 ]
 ```
+**كيف يعمل:** صندوق كتابة حرّة يحلّل ما يكتبه الطالب.
+
+> ⚠️ **حالة الشيفرة اليوم:** النشاط لا يقرأ هذا الحقل بعد — يكفي وجوده
+> غير فارغ ليفتح النشاط. والحقل مُعَدٌّ لربطه لاحقاً.
+
+**المصدر:** موضوع الدرس.
+```
+١ · عنصر واحد
+٢ · prompt_ar = مهمة كتابة من موضوع الدرس، في سطر واحد
+٣ · prompt_zh = ترجمتها بالصينية
+```
+**عند التعذّر:** لا يتعذّر — موجّه واحد يُؤلَّف من أي موضوع.
+
 
 ##### customTrafficLight (id:11) — 🔴 مطلوب
 ```js
@@ -1090,9 +1142,10 @@ activities: []
 □ dialogue.length ≥ 6 (TWIN-2 — dialogue كافٍ لألعاب الحوار)
 □ paragraph.sentence + challenge.sentence: عدد ___ = answers.length بالضبط (TWIN-3)
 □ vocab[0..3] = صحيحة selectWords، vocab[4..7] = خاطئة (TWIN-4)
-□ الحقول السبعة المخصصة موجودة — customTrafficLight · customDotsHunter
+□ الحقول الأحد عشر المخصصة موجودة — customTrafficLight · customDotsHunter
    customConjugationLadder · customPunctuation · customBoardGame
-   customSpotDifference · customWhoAmI
+   customSpotDifference · customWhoAmI · customYoungDoctor · customHealthLetter
+   customHiddenReveal · customWechat
    ⚠️ أيّ غائب = نشاطه يفتح فارغاً. لا توجد بيانات احتياطية في activity.js
 ```
 
@@ -1147,7 +1200,7 @@ activities: []
 - جميع الإجابات (answer/answers/data-answer) بدون تشكيل
 
 ━━━ حقول exercises المخصصة (داخل القسم 9) ━━━
-🔴 سبعة حقول مطلوبة. غياب أيٍّ منها = نشاط معطّل، ولا يوجد احتياطي.
+🔴 أحد عشر حقلاً مطلوباً. غياب أيٍّ منها = نشاط معطّل، ولا يوجد احتياطي.
    راجع القسم U في LESSON_SCHEMA.md لقواعد كلٍّ منها بالتفصيل.
 
 🔴 exercises.customTrafficLight — 6 جُمَل: { arabic, type, chinese }
@@ -1177,6 +1230,12 @@ activities: []
 
 🔴 exercises.customSpotDifference — 4: { sentenceA, sentenceB, keyword }
    جملتان كاملتان متطابقتان إلّا في كلمة واحدة · keyword = "كلمة ≠ كلمة"
+
+🔴 exercises.customYoungDoctor — 2-3 حالات: { name, age, problems, expectedTips[3] }
+   النصائح الثلاث بصيغة أمر أو نهي صريحة، من مفردات الدرس
+
+🔴 exercises.customHealthLetter — عنصر واحد: { prompt_ar, prompt_zh }
+   مهمة كتابة من موضوع الدرس في سطر واحد
 
 🔴 exercises.customWhoAmI — مطلوب، 4-5 ألغاز:
    { word, chinese, hints: [3 تلميحات] }
@@ -1229,6 +1288,8 @@ activities: []
 □ customPunctuation موجود — 5 جُمَل، ولا جملة تحمل علامتها
 □ customBoardGame موجود — 8 مربّعات، num بين 3 و29 تصاعدي بلا تكرار
 □ customSpotDifference موجود — 4 أزواج، كل زوج يختلف بكلمة واحدة فقط
+□ customYoungDoctor موجود — 2-3 حالات، كل حالة 3 نصائح أمر/نهي
+□ customHealthLetter موجود — موجّه كتابة واحد
 ```
 
 ### 🟡 QUALITY (جودة بيداغوجية)

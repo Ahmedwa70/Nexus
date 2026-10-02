@@ -58,6 +58,15 @@ function warn(id, name, msg) { notes.push({ id, name, msg }); }
 
 const VOCAB = new Set((LESSON.vocab || []).map(v => bare(v.ar)));
 
+// نصّ الدرس كاملاً — بلا حقل dots-hunter نفسه، وإلا طابقت الكلمة ذاتها
+const CORPUS = (function () {
+  const ex = Object.assign({}, LESSON.exercises);
+  delete ex.customDotsHunter;
+  return strip(JSON.stringify({
+    v: LESSON.vocab, d: LESSON.dialogue, e: LESSON.explain, g: LESSON.grammar, x: ex
+  }));
+})();
+
 // ── فاحصو القيود — مشتقّون من شيفرة كل نشاط، لا من التخمين ───────
 const RULES = {
   'traffic-light': (d, id, n) => {
@@ -84,7 +93,10 @@ const RULES = {
       if (x.fullWord.slice(-1) !== x.correctLetter)
         bad(id, n, `العنصر #${i + 1}: آخر حرف في fullWord ("${x.fullWord.slice(-1)}") يخالف correctLetter ("${x.correctLetter}")`);
       if (!x.reason) warn(id, n, `العنصر #${i + 1}: reason مفقود`);
-      // تمرين إملائي لا مفرداتي: الكلمة من أيّ نصّ في الدرس، لا من vocab وحدها
+      // تمرين إملائي لا مفرداتي — الكلمة من أيّ نصّ في الدرس، لا من vocab وحدها،
+      // لكنها يجب أن ترد فعلاً في الدرس ولا تُخترع.
+      if (!CORPUS.includes(strip(x.fullWord)))
+        bad(id, n, `العنصر #${i + 1}: "${x.fullWord}" لا ترد في أي نصّ من الدرس — كلمة مخترعة`);
     });
   },
 
@@ -129,7 +141,14 @@ const RULES = {
       if (!x.question) bad(id, n, `المربّع #${i + 1}: question مفقود`);
       else if (x.question.length > 70) warn(id, n, `المربّع #${i + 1}: السؤال طويل (${x.question.length} حرفاً)`);
       if (!x.answer) bad(id, n, `المربّع #${i + 1}: answer مفقود`);
-      else if (/[ً-ْ]/.test(x.answer)) warn(id, n, `المربّع #${i + 1}: answer مشكّلة — الإجابات بلا تشكيل`);
+      else {
+        // الطالب يكتب في حقل عربي (dir="rtl") — إجابة صينية لا يمكن إدخالها أصلاً
+        if (/[一-鿿㐀-䶿]/.test(x.answer))
+          bad(id, n, `المربّع #${i + 1}: answer = "${x.answer}" بالصينية — حقل الإجابة عربي`);
+        else if (x.type !== 'punctuation' && !/[ء-ي]/.test(x.answer))
+          bad(id, n, `المربّع #${i + 1}: answer = "${x.answer}" ليست عربية`);
+        if (/[ً-ْ]/.test(x.answer)) warn(id, n, `المربّع #${i + 1}: answer مشكّلة — الإجابات بلا تشكيل`);
+      }
     });
     if (d.some(x => x.num === 1)) warn(id, n, 'المربّع 1 نقطة البداية — لن يُسأل عنه');
   },
