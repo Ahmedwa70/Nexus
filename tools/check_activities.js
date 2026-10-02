@@ -26,10 +26,23 @@ function loadConst(file, name) {
   return eval('(' + m[1].replace(/;\s*$/, '') + ')');
 }
 
-let LESSON, CONFIG;
+// خط البيانات الحقيقي من bridge.js — لا نكتفي بقراءة الحقل من الملف،
+// بل نمرّره عبر المحوّل نفسه الذي يستعمله المحرّك. فمحوّلٌ قديم قد يُفرغ
+// المصفوفة أو يُفرغ حقول عناصرها، والقراءة المباشرة لا ترى ذلك إطلاقاً.
+function loadSourceMap() {
+  const raw = fs.readFileSync(path.join(ROOT, 'bridge.js'), 'utf8');
+  const a = raw.indexOf('function shuffleArray');
+  const b = raw.indexOf('  // 2. RESOLVE DATA');
+  if (a < 0 || b < 0) return null;
+  try { return eval('(function(){' + raw.slice(a, b) + 'return SOURCE_MAP;})()'); }
+  catch (e) { return null; }
+}
+
+let LESSON, CONFIG, SOURCE_MAP;
 try {
   LESSON = loadConst(TARGET, 'LESSON_DATA');
   CONFIG = loadConst(path.join(ROOT, 'activity.js'), 'ActivityConfig');
+  SOURCE_MAP = loadSourceMap();
 } catch (e) {
   console.error('❌ ' + e.message);
   process.exit(1);
@@ -233,16 +246,36 @@ console.log('  ' + line);
 let okCount = 0;
 CONFIG.forEach(c => {
   const name = c.titleAr || c.type;
-  const value = get(LESSON, c.sourceField);
+  const rawValue = get(LESSON, c.sourceField);
   let status;
 
-  if (value === undefined) {
+  // نمرّر البيانات عبر محوّل bridge.js — هذا ما يصل النشاط فعلاً
+  let value = rawValue;
+  if (Array.isArray(rawValue) && SOURCE_MAP) {
+    const t = SOURCE_MAP[c.type] || SOURCE_MAP['direct'];
+    try { value = t(rawValue, c); } catch (e) {
+      bad(c.id, name, `محوّل "${c.type}" في bridge.js انهار: ${e.message}`);
+      value = [];
+    }
+    if (Array.isArray(value) && rawValue.length && !value.length)
+      bad(c.id, name, `محوّل "${c.type}" في bridge.js أفرغ البيانات (${rawValue.length} عنصراً ← صفر) — محوّل قديم لا يناسب شكل الحقل`);
+    else if (Array.isArray(value) && value.length) {
+      // عناصر باقية لكن حقولها خاوية = عطب صامت أخطر من الفراغ
+      const hollow = value.filter(o => o && typeof o === 'object' &&
+        Object.values(o).filter(v => typeof v === 'string').length &&
+        Object.values(o).every(v => typeof v !== 'string' || !v.trim())).length;
+      if (hollow === value.length)
+        bad(c.id, name, `محوّل "${c.type}" في bridge.js أفرغ حقول العناصر كلها — عطب صامت`);
+    }
+  }
+
+  if (rawValue === undefined) {
     bad(c.id, name, `الحقل "${c.sourceField}" غير موجود في الدرس`);
     status = '🔴 الحقل مفقود';
-  } else if (!Array.isArray(value)) {
-    bad(c.id, name, `"${c.sourceField}" ليس مصفوفة (${typeof value})`);
+  } else if (!Array.isArray(rawValue)) {
+    bad(c.id, name, `"${c.sourceField}" ليس مصفوفة (${typeof rawValue})`);
     status = '🔴 نوع خاطئ';
-  } else if (value.length === 0) {
+  } else if (rawValue.length === 0) {
     bad(c.id, name, `"${c.sourceField}" مصفوفة فارغة`);
     status = '🔴 فارغ';
   } else {

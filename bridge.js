@@ -21,6 +21,13 @@
     return arr;
   }
 
+  // (2026-10-02) حُذفت محوّلات: traffic-light · dots-hunter · conjugation-ladder
+  // punctuation-editor · board-game · spot-difference.
+  // كانت تشتقّ بياناتها من vocab/grammar/explain أيام كان محتواها مدفوناً في
+  // activity.js. وبعد أن صارت تقرأ حقولها الخاصة من lesson.js، صارت تلك
+  // المحوّلات تُشوّه ما تمرّره: ثلاثة تُفرغ المصفوفة، وثلاثة تُبقي عناصرها
+  // وتُفرغ حقولها — وهذا أخطر لأنه يمرّ صامتاً.
+  // الآن تسقط إلى 'direct' فتصل البيانات كما كتبها الذكاء الاصطناعي.
   var SOURCE_MAP = {
     'direct': function(data, config) {
       return config.limit ? data.slice(0, config.limit) : data;
@@ -90,83 +97,6 @@
       return dialogue.map(function(d) {
         return { speaker: d.speaker, text: d.ar, chinese: d.zh };
       });
-    },
-    'traffic-light': function(grammar, config) {
-      return (Array.isArray(grammar) ? grammar : []).filter(function(g) {
-        return g.type === 'pattern';
-      }).map(function(g) {
-        return {
-          arabic: g.ar,
-          type: g.ar && g.ar.indexOf('لَا') !== -1 ? 'negative' : 'command',
-          chinese: g.zh
-        };
-      });
-    },
-    'dots-hunter': function(vocab, config) {
-      var limit = config.limit || 6;
-      return (Array.isArray(vocab) ? vocab : []).filter(function(v) {
-        return v.ar && v.ar.slice(-1) === 'ة';
-      }).slice(0, limit).map(function(v) {
-        var base = v.ar.slice(0, -1);
-        return {
-          base: base + '_',
-          correctLetter: 'ة',
-          fullWord: v.ar,
-          reason: v.type + ' — ' + v.zh
-        };
-      });
-    },
-    'conjugation-ladder': function(grammar, config) {
-      if (!Array.isArray(grammar)) return [];
-      var found = null;
-      for (var ci = 0; ci < grammar.length; ci++) {
-        if (grammar[ci].type === 'conjugation') { found = grammar[ci]; break; }
-      }
-      if (found && Array.isArray(found.items)) {
-        return found.items.map(function(item) {
-          return { past: '', present: item.verb };
-        });
-      }
-      return (config.limit ? grammar.slice(0, config.limit) : grammar).map(function(g) {
-        return { past: '', present: g.ar || '' };
-      });
-    },
-    'punctuation-editor': function(mcq, config) {
-      if (!Array.isArray(mcq)) return [];
-      return mcq.slice(0, config.limit || 5).map(function(q) {
-        var text = q.question || '';
-        var mark = '.';
-        if (text.indexOf('؟') !== -1) mark = '؟';
-        else if (text.indexOf('كَم') !== -1 || text.indexOf('أَي') !== -1 || text.indexOf('هَل') !== -1) mark = '؟';
-        else if (text.indexOf('!') !== -1) mark = '!';
-        return { text: text, correctMark: mark };
-      });
-    },
-    'board-game': function(explain, config) {
-      if (!Array.isArray(explain)) return [];
-      return explain.slice(0, config.limit || 8).map(function(ex, i) {
-        var q = ex.ar || '';
-        if (q.length > 60) q = q.slice(0, 60) + '...؟';
-        else if (q) q = q + '؟';
-        var label = (ex.label || '').replace(/^[①②③④⑤⑥⑦⑧]\s*/, '').trim();
-        return { num: (i + 1) * 3, question: q, answer: label, type: 'vocab' };
-      });
-    },
-    'spot-difference': function(vocab, config) {
-      if (!Array.isArray(vocab)) return [];
-      var limit = config.limit || 4;
-      var pairs = [];
-      for (var si = 0; si < Math.min(vocab.length - 1, limit * 2); si += 2) {
-        var a = vocab[si], b = vocab[si + 1];
-        if (a && b && a.ar && b.ar) {
-          pairs.push({
-            sentenceA: a.ar,
-            sentenceB: b.ar,
-            keyword: a.ar + ' ≠ ' + b.ar
-          });
-        }
-      }
-      return pairs;
     },
     'hidden-reveal': function(data, config) {
       return Array.isArray(data) ? data.slice(0, config.limit || data.length) : [];
