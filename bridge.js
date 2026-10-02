@@ -26,7 +26,11 @@
       return config.limit ? data.slice(0, config.limit) : data;
     },
     'wheel': function(vocab, config) {
-      return (config.limit ? vocab.slice(0, config.limit) : vocab).map(function(v) {
+      // اختيار عشوائي لا أوّل-N: وإلا بقيت آخر المفردات لا تظهر أبداً.
+      // نُبدّل نسخةً لا الأصل — shuffleArray تُعدّل في مكانها.
+      var pool = shuffleArray(vocab.slice());
+      if (config.limit) pool = pool.slice(0, config.limit);
+      return pool.map(function(v) {
         return { arabic: v.ar, chinese: v.zh, emoji: v.emoji };
       });
     },
