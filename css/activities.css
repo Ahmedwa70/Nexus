@@ -1166,6 +1166,39 @@
 #act-trigger-btn:active { transform: scale(0.95); }
 
 @media (max-width: 600px) {
-  #act-overlay .act-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+  #act-overlay .act-grid { grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr)); gap: 10px; }
   #act-topbar h2 { display: none; }
+}
+
+/* Shared activity responsiveness: constrain the canvas and let controls wrap. */
+#activity-container, #act-overlay, #act-topbar, #act-overlay .act-grid,
+#activity-container .glass-card, #activity-container .activity-content {
+  min-width: 0;
+  max-width: 100%;
+}
+#activity-container { width: 100%; overflow-x: hidden; }
+#act-topbar { flex-wrap: wrap; gap: 8px; }
+#act-overlay .act-grid { width: 100%; }
+#activity-container .glass-card { padding: clamp(16px, 3vw, 24px); }
+#activity-container .btn, #activity-container button { min-height: 44px; }
+
+@media (max-width: 768px) {
+  #act-topbar { padding-inline: 12px; }
+  #act-topbar .act-topbar-start, #act-topbar .act-stats, #act-topbar #act-cp-clone { flex-wrap: wrap; min-width: 0; }
+  #activity-container .tap-options { grid-template-columns: 1fr; }
+  #activity-container .sound-options { grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr)); }
+  #activity-container .memory-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  #activity-container .sentence-target { gap: 8px; padding: 12px; }
+  #activity-container .word-bank { gap: 8px; }
+  #activity-container .word-chip { max-width: 100%; padding: 10px 14px; font-size: clamp(18px, 4.5vw, 28px); }
+  #activity-container .modal-overlay { padding: 12px; }
+  #activity-container .modal-box { padding: 24px 16px; }
+}
+
+@media (max-width: 420px) {
+  #activity-container { padding-inline: 10px; }
+  #activity-container .memory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #activity-container .sound-options { grid-template-columns: 1fr; }
+  #activity-container .activity-heading { font-size: clamp(20px, 7vw, 28px); }
+  #activity-container .tap-option, #activity-container .sound-option { padding-inline: 12px; }
 }
