@@ -565,7 +565,7 @@ const AutoFocus = {
         if (indicator) indicator.classList.remove('show');
     },
 
-    // إيقاف مؤقت لمدة دقيقتين بعد الإطفاء اليدوي (احترام لرغبة المستخدم)
+    // إيقاف مؤقت لمدة دقيقتين بعد الإطفاء اليدوي (احترام لرغبة المست��دم)
     suppress(durationMs = 120000) {
         this.suppressedUntil = Date.now() + durationMs;
         this.deactivate(true);
@@ -2604,7 +2604,7 @@ function buildCorrectErrorExercise(num) {
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
     <div class="ex-title">صَحِّحِ الخَطَأ</div>
-    <div class="ex-instruction">改错 — 找出错误的词</div>
+    <div class="ex-instruction">改错 — 找出���误的词</div>
   </div></div>
   <div class="fill-sentence">${escapeHtml(data.sentence)}</div>
   <div class="mcq-options">${options}</div>
@@ -2811,7 +2811,7 @@ function buildSentenceTransformExercise(num) {
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
     <div class="ex-title">${escapeHtml(data.title)}</div><div class="ex-instruction">${escapeHtml(data.instruction)}</div>
   </div></div>
-  <div class="fill-sentence">${escapeHtml(data.sentence)}</div>
+  <div class="fill-sentence">${data.sentence}</div>
   <button class="check-btn" onclick="checkFill(this)">✓ تَحَقَّقْ <span class="zh-only">· 检查</span></button>
   <div class="feedback"></div>
 </div>`;
