@@ -10,6 +10,7 @@
 const fs   = require('fs');
 const path = require('path');
 const vm   = require('vm');
+const { spawnSync } = require('child_process');
 
 // ── الملف المراد فحصه ─────────────────────────────────────────
 const TARGET = path.resolve(process.argv[2] || './data/lesson.js');
@@ -524,7 +525,7 @@ function printResults() {
     const L = '═'.repeat(65);
     const l = '─'.repeat(65);
 
-    // ── حساب ملخص الصحة ─────────────────────────────────────────
+    // ── حسا�� ملخص الصحة ─────────────────────────────────────────
 
     // تمارين متأثرة (من الـ warnings و errors)
     const EX_KEYS = ['mcq','trueFalse','fillBlanks','dragWords','orderWords',
@@ -664,6 +665,15 @@ function printResults() {
         console.log('\n  ✅ النتيجة النهائية: الدرس صالح للنشر');
     }
     console.log('\n' + L + '\n');
+}
+
+if (result.errors.length === 0) {
+    const activityChecker = path.resolve(__dirname, 'tools/check_activities.js');
+    const activityResult = spawnSync(process.execPath, [activityChecker, TARGET], { stdio: 'inherit' });
+    if (activityResult.error || activityResult.status !== 0) {
+        error('ACT-001', 'tools/check_activities.js',
+            'فشل فحص الأنشطة — لا يمكن اعتماد الدرس');
+    }
 }
 
 printResults();
