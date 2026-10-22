@@ -189,7 +189,9 @@
     13: 'renderQuickReaction', 14: 'renderMiniMaze', 15: 'renderDotsHunter',
     16: 'renderConjugationLadder', 17: 'renderPunctuationEditor',
     18: 'renderYoungDoctor', 19: 'renderHealthLetter', 20: 'renderBoardGame',
-    21: 'renderSpotDifference', 22: 'renderProgressiveStory'
+    21: 'renderSpotDifference', 22: 'renderProgressiveStory',
+    23: 'renderRoleDialogue', 24: 'renderListenRespond',
+    25: 'renderSpeakingChallenge'
   };
 
   function getRenderer(id) {
@@ -534,8 +536,11 @@ var overlay = document.createElement('div');
   // 13. CONFETTI
   // ════════════════════════════════════════════════
   var confettiParticles = [];
+  var confettiRaf = null;   // معرّف الحلقة الجارية — يُلغى قبل أي احتفال جديد
 
   function startConfetti(canvas) {
+    // حلقة واحدة فقط: إلغاء الاحتفال السابق إن كان لا يزال يعمل
+    if (confettiRaf) { cancelAnimationFrame(confettiRaf); confettiRaf = null; }
     confettiParticles = [];
     var ctx = canvas.getContext('2d');
     var W = canvas.width = window.innerWidth;
@@ -550,19 +555,35 @@ var overlay = document.createElement('div');
         rot: Math.random() * 360, rv: (Math.random() - 0.5) * 4
       });
     }
-    var frames = 0;
-    function draw() {
-      if (frames++ > 150) { ctx.clearRect(0,0,W,H); return; }
-      ctx.clearRect(0,0,W,H);
+    // مدة الاحتفال زمنية (~2.5 ث ≈ 150 إطارًا عند 60fps) — لا تعتمد على عدد الإطارات
+    var DURATION = 2500;
+    var start = performance.now();
+    var last = start;
+    function draw(now) {
+      confettiRaf = null;
+      // إيقاف فوري عند إغلاق مركز الأنشطة — لا عمل بعد انتهاء الحاجة
+      var overlay = document.getElementById('act-overlay');
+      if (!overlay || !overlay.classList.contains('active') || now - start > DURATION) {
+        ctx.clearRect(0, 0, W, H);
+        return;
+      }
+      // خطوات مكافئة لإطار 60fps مهما كان معدل الإطارات الفعلي (بحد أقصى 3)
+      var dt = Math.min((now - last) / 16.667, 3);
+      last = now;
+      ctx.clearRect(0, 0, W, H);
       confettiParticles.forEach(function(p) {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.05; p.rot += p.rv;
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
-        ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-        ctx.restore();
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 0.05 * dt; p.rot += p.rv * dt;
+        // تحويل مباشر بدل save/translate/rotate/restore لكل جسيم
+        var rad = p.rot * Math.PI / 180;
+        var cos = Math.cos(rad), sin = Math.sin(rad);
+        ctx.setTransform(cos, sin, -sin, cos, p.x, p.y);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
       });
-      requestAnimationFrame(draw);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      confettiRaf = requestAnimationFrame(draw);
     }
-    draw();
+    confettiRaf = requestAnimationFrame(draw);
   }
 
   // ════════════════════════════════════════════════

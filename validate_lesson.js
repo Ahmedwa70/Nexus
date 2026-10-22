@@ -9,9 +9,10 @@
 
 const fs   = require('fs');
 const path = require('path');
+const vm   = require('vm');
 
 // ── الملف المراد فحصه ─────────────────────────────────────────
-const TARGET = path.resolve(process.argv[2] || './lesson.js');
+const TARGET = path.resolve(process.argv[2] || './data/lesson.js');
 
 // ── قراءة الملف ──────────────────────────────────────────────
 let raw;
@@ -79,8 +80,8 @@ try {
     // نستخرج محتوى الـ object فقط
     const match = raw.match(/const\s+LESSON_DATA\s*=\s*(\{[\s\S]*\})\s*;?\s*$/);
     if (!match) throw new Error('لم يُعثر على LESSON_DATA object — تحقق من صياغة const LESSON_DATA = {...}');
-    // eslint-disable-next-line no-eval
-    data = eval('(' + match[1] + ')');
+    // تقييم معزول في sandbox بلا صلاحيات وبمهلة زمنية — لا يصل إلى require/process/fs
+    data = vm.runInNewContext('(' + match[1] + ')', Object.create(null), { timeout: 1000 });
 } catch (e) {
     error('SYN-006', 'LESSON_DATA',
         'JavaScript parse error: ' + e.message);

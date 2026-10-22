@@ -86,5 +86,14 @@ const ActivityConfig = [
   { id:21, type:"spot-difference",      icon:"🔍", titleAr:"ابحث عن الفرق",      titleZh:"找不同",       difficulty:3, phase:4, xp:30, sourceField:"exercises.customSpotDifference" },
 
   // ── 22. progressive-story ──
-  { id:22, type:"progressive-story",    icon:"📖", titleAr:"قصة تدريجية",        titleZh:"逐步故事",     difficulty:2, phase:4, xp:20, sourceField:"dialogue" }
+  { id:22, type:"progressive-story",    icon:"📖", titleAr:"قصة تدريجية",        titleZh:"逐步故事",     difficulty:2, phase:4, xp:20, sourceField:"dialogue" },
+
+  // ── 23. role-dialogue ──
+  { id:23, type:"role-dialogue",        icon:"🎭", titleAr:"حوار الأدوار",       titleZh:"角色对话",     difficulty:2, phase:2, xp:20, sourceField:"exercises.customRoleDialogue" },
+
+  // ── 24. listen-respond ──
+  { id:24, type:"listen-respond",       icon:"🎙️", titleAr:"اسمع وأجب",        titleZh:"听答",         difficulty:2, phase:2, xp:20, sourceField:"exercises.customListenRespond" },
+
+  // ── 25. speaking-challenge ──
+  { id:25, type:"speaking-challenge",   icon:"🗣️", titleAr:"تحدّي التحدث",     titleZh:"口语挑战",     difficulty:3, phase:4, xp:30, sourceField:"exercises.customSpeakingChallenge" }
 ];
