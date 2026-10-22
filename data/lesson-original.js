@@ -373,6 +373,11 @@ const LESSON_DATA = {
 
   exercises: {
 
+    // 9-U: 🔴 customListenRespond — نشاط «اسمع وأجب» (id:24) — مطلوب، لا احتياطي
+    // القواعد الكاملة في LESSON_SCHEMA.md §U: 1-2 جولة، كل جولة 3-5 أسئلة
+    // items: [{ prompt (يُنطق عند 🔊), zh, options: [3 ردود], correct (0-2) }]
+    customListenRespond: [],
+
     // 9-A: MCQ
     mcq: [
       {
