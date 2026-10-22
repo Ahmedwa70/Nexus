@@ -2,6 +2,12 @@
 // *** 1. INIT - بدء التشغيل - 初始化
 // ================================================================
 document.documentElement.setAttribute('data-theme', 'light');
+// Escape untrusted (lesson-generated) text before inserting it into HTML markup.
+function escapeHtml(s) {
+    return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 let currentIndex = 0;
 let speedQs = [];
 
@@ -206,7 +212,7 @@ function renderHook(data) {
     if (taglineParts.length > 1) {
         const arPart = taglineParts[0].replace(/\s*·\s*$/, '');
         const zhPart = taglineParts.slice(1).join('');
-        document.getElementById('hookTagline').innerHTML = arPart + ' <span class="zh-only">· ' + zhPart + '</span>';
+        document.getElementById('hookTagline').innerHTML = escapeHtml(arPart) + ' <span class="zh-only">· ' + escapeHtml(zhPart) + '</span>';
     } else {
         document.getElementById('hookTagline').innerText = data.tagline;
     }
@@ -219,9 +225,9 @@ function renderHook(data) {
         div.className = `compare-card ${item.type}`;
 
         div.innerHTML = `
-            <span class="compare-emoji">${item.emoji}</span>
-            <div class="compare-title ar-text">${item.ar}</div>
-            <div class="compare-zh">${item.zh}</div>
+            <span class="compare-emoji">${escapeHtml(item.emoji)}</span>
+            <div class="compare-title ar-text">${escapeHtml(item.ar)}</div>
+            <div class="compare-zh">${escapeHtml(item.zh)}</div>
         `;
 
         grid.appendChild(div);
@@ -309,9 +315,9 @@ function renderDialogueScenes(scenes) {
         div.style.background = scene.gradient;
 
         div.innerHTML = `
-            ${scene.emoji}
+            ${escapeHtml(scene.emoji)}
             <div class="scene-label">
-                ${scene.label_ar} <span class="zh-only">· ${scene.label_zh}</span>
+                ${escapeHtml(scene.label_ar)} <span class="zh-only">· ${escapeHtml(scene.label_zh)}</span>
             </div>
         `;
 
@@ -334,9 +340,9 @@ function renderDialogue(dialogue) {
         if (index === 0) div.classList.add("revealed");
 
         div.innerHTML = `
-      <span class="speaker ${line.role}">${line.speaker}</span>
-      <div class="ar-text">${line.ar}</div>
-      <div class="zh-text">${line.zh}</div>
+      <span class="speaker ${line.role}">${escapeHtml(line.speaker)}</span>
+      <div class="ar-text">${escapeHtml(line.ar)}</div>
+      <div class="zh-text">${escapeHtml(line.zh)}</div>
     `;
 
         // Newly built dialogue translation must reflect the current toggle state.
@@ -973,7 +979,9 @@ function speakAr(text) {
         window.speechSynthesis.speak(u);
     };
     if (window.speechSynthesis.getVoices().length === 0) {
+        // حاول فورًا أيضًا؛ onvoiceschanged يبقى احتياطًا إن أُطلق لاحقًا
         window.speechSynthesis.onvoiceschanged = trySpeak;
+        trySpeak();
     } else {
         trySpeak();
     }
@@ -1037,7 +1045,7 @@ function showSpeedQ() {
     q.opts.forEach((o, i) => {
         const b = document.createElement('button');
         b.className = 'mcq-opt';
-        b.innerHTML = '<span class="ar-text">' + o + '</span>';
+        b.innerHTML = '<span class="ar-text">' + escapeHtml(o) + '</span>';
         b.onclick = () => {
             if (i === q.ans) { speedScore++; correctCount++ } else { wrongCount++ }
             document.getElementById('speedScore').innerHTML = 'النَّتِيجَة <span class="zh-only">· 分数</span>: ' + speedScore;
@@ -1668,7 +1676,8 @@ function toggleZH() {
 
 function wrapZh(text) {
     if (!text) return '';
-    return text.replace(/(\s*[·=]\s*)?([一-鿿　-〿＀-￯（）！？，。、：；""'']+)/g, function(m, sep, zh) {
+    const safe = escapeHtml(text);
+    return safe.replace(/(\s*[·=]\s*)?([一-鿿　-〿＀-￯（）！？，。、：；""'']+)/g, function(m, sep, zh) {
         return '<span class="zh-only">' + (sep || '') + zh + '</span>';
     });
 }
@@ -1903,9 +1912,9 @@ function renderVocab(vocab) {
         card.className = 'vocab-card';
 
         card.innerHTML = `
-    <div class="vocab-emoji">${item.emoji}</div>
-    <div class="vocab-ar">${item.ar}</div>
-    <div class="vocab-zh-hidden">${item.zh}</div>
+    <div class="vocab-emoji">${escapeHtml(item.emoji)}</div>
+    <div class="vocab-ar">${escapeHtml(item.ar)}</div>
+    <div class="vocab-zh-hidden">${escapeHtml(item.zh)}</div>
     <div class="vocab-tag">${wrapZh(item.type)}</div>
     <button class="vocab-speak-btn" 
             onclick="event.stopPropagation(); speakVocabWord(this, '${safeAttr(item.ar)}')" 
@@ -1937,9 +1946,9 @@ function renderThinking(thinking) {
 
         div.innerHTML = `
             <span class="q-number">${toArabicNumber(index + 1)}</span>
-            <span class="q-emoji">${q.emoji}</span>
-            <div class="ar-text">${q.ar}</div>
-            <div class="zh-text">${q.zh}</div>
+            <span class="q-emoji">${escapeHtml(q.emoji)}</span>
+            <div class="ar-text">${escapeHtml(q.ar)}</div>
+            <div class="zh-text">${escapeHtml(q.zh)}</div>
         `;
 
         container.appendChild(div);
@@ -2021,8 +2030,8 @@ function renderExplain(explain) {
 
         div.innerHTML = `
             <span class="explain-label">${wrapZh(item.label)}</span>
-            <div class="ar-text">${item.ar}</div>
-            <div class="zh-text">${item.zh}</div>
+            <div class="ar-text">${escapeHtml(item.ar)}</div>
+            <div class="zh-text">${escapeHtml(item.zh)}</div>
 
             ${item.note ? `<div class="explain-note">${wrapZh(item.note)}</div>` : ''}
         `;
@@ -2125,9 +2134,9 @@ function renderGrammar(grammar) {
                 card.className = 'conj-card';
 
                 card.innerHTML = `
-                    <div class="conj-pronoun">${row.pronoun || ""}</div>
-                    <div class="conj-verb">${row.verb || ""}</div>
-                    <div class="conj-zh">${row.zh || ""}</div>
+                    <div class="conj-pronoun">${escapeHtml(row.pronoun || "")}</div>
+                    <div class="conj-verb">${escapeHtml(row.verb || "")}</div>
+                    <div class="conj-zh">${escapeHtml(row.zh || "")}</div>
                 `;
 
                 grid.appendChild(card);
@@ -2154,14 +2163,14 @@ function renderGrammar(grammar) {
                             const clean = hasQ ? word.slice(0, -1) : word;
                             const qMark = hasQ ? '<span class="q-mark">؟</span>' : '';
                             return `
-                                <span class="word-card">${clean}</span>${qMark}
+                                <span class="word-card">${escapeHtml(clean)}</span>${qMark}
                                 ${i < words.length - 1 ? '<span class="word-plus">+</span>' : ''}
                             `;
                         }).join('');
                     })()}
                 </div>
                 <div class="zh-text show grammar-formula-zh">
-                    ${item.zh || ""}
+                    ${escapeHtml(item.zh || "")}
                 </div>
             `;
 
@@ -2174,7 +2183,7 @@ function renderGrammar(grammar) {
             console.warn("⚠️ عنصر غير معروف في grammar:", item);
 
             const div = document.createElement('div');
-            div.innerHTML = `<pre>${JSON.stringify(item, null, 2)}</pre>`;
+            div.innerHTML = `<pre>${escapeHtml(JSON.stringify(item, null, 2))}</pre>`;
             container.appendChild(div);
         }
 
@@ -2361,14 +2370,14 @@ function buildMatchExercise(num) {
     const letters = ['a', 'b', 'c', 'd', 'e'];
 
     const leftCol = items.map((v, i) =>
-        `<div class="match-item" onclick="matchPick(this,'${letters[i]}')"><span class="ar-text">${v.ar}</span></div>`
+        `<div class="match-item" onclick="matchPick(this,'${letters[i]}')"><span class="ar-text">${escapeHtml(v.ar)}</span></div>`
     ).join('\n');
 
     // الجانب الأيمن بترتيب مختلف
     const shuffled = [items[2], items[0], items[4], items[3], items[1]];
     const shuffledLetters = ['c', 'a', 'e', 'd', 'b'];
     const rightCol = shuffled.map((v, i) =>
-        `<div class="match-item" onclick="matchPick(this,'${shuffledLetters[i]}')"><span class="zh-text show">${v.zh}</span></div>`
+        `<div class="match-item" onclick="matchPick(this,'${shuffledLetters[i]}')"><span class="zh-text show">${escapeHtml(v.zh)}</span></div>`
     ).join('\n');
 
     return `
@@ -2395,14 +2404,14 @@ function buildSelectWordsExercise(num) {
     ];
 
     const chips = all.map(item =>
-        `        <span class="chip" onclick="tapSelect(this,${item.isCorrect})">${item.ar}</span>`
+        `        <span class="chip" onclick="tapSelect(this,${item.isCorrect})">${escapeHtml(item.ar)}</span>`
     ).join('\n    ');
 
     return `
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
-    <div class="ex-title">اِخْتَرِ الكَلِمَات الصَّحِيحَة — ${LESSON_DATA.exercises.selectWords?.title_ar || ""}</div>
-    <div class="ex-instruction">${LESSON_DATA.exercises.selectWords?.title_zh || "点击选择正确的词语"}</div>
+    <div class="ex-title">اِخْتَرِ الكَلِمَات الصَّحِيحَة — ${escapeHtml(LESSON_DATA.exercises.selectWords?.title_ar || "")}</div>
+    <div class="ex-instruction">${escapeHtml(LESSON_DATA.exercises.selectWords?.title_zh || "点击选择正确的词语")}</div>
   </div></div>
   <div class="chip-grid">
     ${chips}
@@ -2416,8 +2425,8 @@ function buildTrueFalseExercise(num) {
     const rows = items.map(item => `
     <div class="tf-item">
       <div class="tf-statement">
-        <span class="ar-text">${item.ar}</span>
-        <div class="zh-text">${item.zh}</div>
+        <span class="ar-text">${escapeHtml(item.ar)}</span>
+        <div class="zh-text">${escapeHtml(item.zh)}</div>
       </div>
       <div class="tf-btns">
         <button class="tf-btn" onclick="tf(this,${item.correct})">✓ صَحِيح</button>
@@ -2442,7 +2451,7 @@ function buildListeningExercise(num) {
 
     const letters = ['أ', 'ب', 'ج'];
     const options = opts.map((o, i) =>
-        `<div class="mcq-opt" onclick="mcq(this,${o.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${o.ar}</span></div>`
+        `<div class="mcq-opt" onclick="mcq(this,${o.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${escapeHtml(o.ar)}</span></div>`
     ).join('\n');
 
     return `
@@ -2451,7 +2460,7 @@ function buildListeningExercise(num) {
     <div class="ex-title">اِسْتِمَاع وَاخْتِيَار</div>
     <div class="ex-instruction">听力练习 🔊</div>
   </div></div>
-  <div class="exercise-speaker" onclick="playAudio(this,'${line.ar}')">
+  <div class="exercise-speaker" onclick="playAudio(this,'${escapeHtml(safeAttr(line.ar))}')">
     <div class="speaker-icon exercise-speaker-icon">🔊</div>
     <div class="exercise-speaker-hint">اِضْغَطْ لِلاسْتِمَاع <span class="zh-only">· 点击播放</span></div>
   </div>
@@ -2463,14 +2472,14 @@ function buildConjugationExercise(num) {
     const data = LESSON_DATA.exercises.patternFill;
 
     const rows = data.lines.map(line =>
-        `<div class="fill-sentence">${line.pronoun} <input class="fill-input" data-answer="${line.verb}"> ${line.suffix}</div>`
+        `<div class="fill-sentence">${escapeHtml(line.pronoun)} <input class="fill-input" data-answer="${escapeHtml(line.verb)}"> ${escapeHtml(line.suffix)}</div>`
     ).join('\n');
 
     return `
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
     <div class="ex-title">تَدْرِيبٌ عَلَى النَّمَط</div>
-    <div class="ex-instruction">${data.instruction || '句型操练 — 动词变位'}</div>
+    <div class="ex-instruction">${escapeHtml(data.instruction || '句型操练 — 动词变位')}</div>
   </div></div>
   ${rows}
   <button class="check-btn" onclick="checkFill(this)">✓ تَحَقَّقْ <span class="zh-only">· 检查</span></button>
@@ -2483,9 +2492,9 @@ function buildDialogueExercise(num) {
 
     const rows = lines.map(line => {
         const cls = line.text.includes('___') ? 'fill-input fill-input-wide' : '';
-        const html = line.text.replace('___',
-            `<input class="${cls}" data-answer="${line.answer}">`);
-        return `<div class="fill-sentence"><span class="ar-text" style="font-weight:600">${line.speaker}:</span> ${html}</div>`;
+        const html = escapeHtml(line.text).replace('___',
+            `<input class="${cls}" data-answer="${escapeHtml(line.answer)}">`);
+        return `<div class="fill-sentence"><span class="ar-text" style="font-weight:600">${escapeHtml(line.speaker)}:</span> ${html}</div>`;
     }).join('\n');
 
     return `
@@ -2503,7 +2512,7 @@ function buildDialogueExercise(num) {
 function buildMCQExercise(num, data) {
     const letters = ['أ', 'ب', 'ج', 'د'];
     const options = data.options.map((opt, i) =>
-        `<div class="mcq-opt" onclick="mcq(this,${i === data.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${opt}</span></div>`
+        `<div class="mcq-opt" onclick="mcq(this,${i === data.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${escapeHtml(opt)}</span></div>`
     ).join('\n');
 
     return `
@@ -2512,7 +2521,7 @@ function buildMCQExercise(num, data) {
     <div class="ex-title">اِخْتَرِ الإِجَابَة الصَّحِيحَة</div>
     <div class="ex-instruction">选择正确答案</div>
   </div></div>
-  ${data.question ? `<div class="fill-sentence">${data.question}</div>` : ''}
+  ${data.question ? `<div class="fill-sentence">${escapeHtml(data.question)}</div>` : ''}
   <div class="mcq-options">${options}</div>
 </div>`;
 }
@@ -2522,7 +2531,7 @@ function buildFillBlanksExercise(num) {
 
     const rows = items.map(item => {
         const parts = item.sentence.split('___');
-        return `<div class="fill-sentence">${parts[0]}<input class="fill-input" data-answer="${item.answer}">${parts[1] || ''}</div>`;
+        return `<div class="fill-sentence">${escapeHtml(parts[0])}<input class="fill-input" data-answer="${escapeHtml(item.answer)}">${escapeHtml(parts[1] || '')}</div>`;
     }).join('\n');
 
     return `
@@ -2541,7 +2550,7 @@ function buildDragExercise(num) {
     const items = LESSON_DATA.exercises.dragWords;
 
     const dragItems = items.map(item =>
-        `<div class="drag-item" draggable="true" data-cat="${item.cat}">${item.ar}</div>`
+        `<div class="drag-item" draggable="true" data-cat="${escapeHtml(item.cat)}">${escapeHtml(item.ar)}</div>`
     ).join('\n');
 
     return `
@@ -2555,7 +2564,7 @@ function buildDragExercise(num) {
   </div>
     <div class="drag-container">
     ${(LESSON_DATA.exercises.dragZones || []).map(zone =>
-        `<div class="drag-zone" data-accept="${zone.accept}"><div class="drag-zone-title">${zone.emoji} ${zone.ar} · ${zone.zh}</div></div>`
+        `<div class="drag-zone" data-accept="${escapeHtml(zone.accept)}"><div class="drag-zone-title">${escapeHtml(zone.emoji)} ${escapeHtml(zone.ar)} · ${escapeHtml(zone.zh)}</div></div>`
     ).join('\n')}
   </div>
 </div>`;
@@ -2566,7 +2575,7 @@ function buildOrderExercise(num) {
     const target = LESSON_DATA.exercises.orderTarget;
 
     const wordItems = words.map(w =>
-        `<div class="order-word" draggable="true">${w}</div>`
+        `<div class="order-word" draggable="true">${escapeHtml(w)}</div>`
     ).join('\n');
 
     return `
@@ -2575,7 +2584,7 @@ function buildOrderExercise(num) {
     <div class="ex-title">رَتِّبِ الجُمْلَة</div>
     <div class="ex-instruction">排序句子</div>
   </div></div>
-  <div class="order-target">الهَدَف: <em class="ar-text order-target-em">${target}</em></div>
+  <div class="order-target">الهَدَف: <em class="ar-text order-target-em">${escapeHtml(target)}</em></div>
   <div class="order-container" id="orderPool">
     ${wordItems}
   </div>
@@ -2588,7 +2597,7 @@ function buildCorrectErrorExercise(num) {
     const letters = ['أ', 'ب', 'ج', 'د'];
 
     const options = data.options.map((opt, i) =>
-        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${opt.ar}</span></div>`
+        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${escapeHtml(opt.ar)}</span></div>`
     ).join('\n');
 
     return `
@@ -2597,7 +2606,7 @@ function buildCorrectErrorExercise(num) {
     <div class="ex-title">صَحِّحِ الخَطَأ</div>
     <div class="ex-instruction">改错 — 找出错误的词</div>
   </div></div>
-  <div class="fill-sentence">${data.sentence}</div>
+  <div class="fill-sentence">${escapeHtml(data.sentence)}</div>
   <div class="mcq-options">${options}</div>
 </div>`;
 }
@@ -2610,9 +2619,9 @@ function buildRewriteExercise(num) {
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
     <div class="ex-title">أَعِدْ كِتَابَة الجُمْلَة</div>
-    <div class="ex-instruction">${data.instruction || "أَعِدْ كِتَابَة الجُمْلَة"}</div>
+    <div class="ex-instruction">${escapeHtml(data.instruction || "أَعِدْ كِتَابَة الجُمْلَة")}</div>
   </div></div>
-  <div class="fill-sentence">${parts[0]}<input class="fill-input" data-answer="${data.answer}">${parts[1] || ''}</div>
+  <div class="fill-sentence">${escapeHtml(parts[0])}<input class="fill-input" data-answer="${escapeHtml(data.answer)}">${escapeHtml(parts[1] || '')}</div>
   <button class="check-btn" onclick="checkFill(this)">✓ تَحَقَّقْ <span class="zh-only">· 检查</span></button>
   <div class="feedback"></div>
 </div>`;
@@ -2624,9 +2633,9 @@ function buildParagraphExercise(num) {
 
     let sentence = '';
     parts.forEach((part, i) => {
-        sentence += part;
+        sentence += escapeHtml(part);
         if (i < data.answers.length) {
-            sentence += `<input class="fill-input" data-answer="${data.answers[i]}">`;
+            sentence += `<input class="fill-input" data-answer="${escapeHtml(data.answers[i])}">`;
         }
     });
 
@@ -2647,7 +2656,7 @@ function buildContextAnalysisExercise(num) {
     const letters = ['أ', 'ب', 'ج'];
 
     const options = data.options.map((opt, i) =>
-        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${opt.ar}</span></div>`
+        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${escapeHtml(opt.ar)}</span></div>`
     ).join('\n');
 
     const parts = data.question.split(' · ');
@@ -2661,13 +2670,13 @@ function buildContextAnalysisExercise(num) {
     <div class="ex-instruction">情境分析</div>
   </div></div>
   <div class="exercise-context-box">
-    <div class="ar-text">${(data.dialogue || '').replace(/\n/g, '<br>')}</div>
+    <div class="ar-text">${escapeHtml(data.dialogue || '').replace(/\n/g, '<br>')}</div>
   </div>
   <div class="ex-q-card" style="margin-top:14px">
     <div class="ex-q-top">
       <span class="ex-q-badge">❓</span>
-      <span class="ex-q-ar">${questionAr}</span>
-      <span class="ex-q-zh zh-text">${questionZh}</span>
+      <span class="ex-q-ar">${escapeHtml(questionAr)}</span>
+      <span class="ex-q-zh zh-text">${escapeHtml(questionZh)}</span>
     </div>
   </div>
   <div class="mcq-options">${options}</div>
@@ -2679,7 +2688,7 @@ function buildScenarioExercise(num) {
     const letters = ['أ', 'ب', 'ج'];
 
     const options = data.options.map((opt, i) =>
-        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${opt.ar}</span></div>`
+        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${escapeHtml(opt.ar)}</span></div>`
     ).join('\n');
 
     return `
@@ -2690,10 +2699,10 @@ function buildScenarioExercise(num) {
   </div></div>
     <div class="exercise-scenario-box">
     <div class="ar-text" style="margin-bottom:8px">📋 المَوْقِف <span class="zh-only">· 场景</span></div>
-    <div class="ar-text">${data.setup_ar || data.question}</div>
-    <div class="zh-text show" style="margin-top:4px">${data.setup_zh || ""}</div>
+    <div class="ar-text">${escapeHtml(data.setup_ar || data.question)}</div>
+    <div class="zh-text show" style="margin-top:4px">${escapeHtml(data.setup_zh || "")}</div>
     <div style="border-top:1px dashed rgba(102,126,234,.3);margin:12px 0"></div>
-    <div class="ar-text">❓ ${data.question}</div>
+    <div class="ar-text">❓ ${escapeHtml(data.question)}</div>
   </div>
   <div class="mcq-options">${options}</div>
 </div>`;
@@ -2704,7 +2713,7 @@ function buildVisualChoiceExercise(num) {
     const letters = ['أ', 'ب', 'ج'];
 
     const options = data.options.map((opt, i) =>
-        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${opt.ar}</span></div>`
+        `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${escapeHtml(opt.ar)}</span></div>`
     ).join('\n');
 
     return `
@@ -2713,7 +2722,7 @@ function buildVisualChoiceExercise(num) {
     <div class="ex-title">اِخْتَرْ مِنَ الصُّورَة</div>
     <div class="ex-instruction">视觉推理</div>
   </div></div>
-  <div class="visual-emoji">${data.emoji}</div>
+  <div class="visual-emoji">${escapeHtml(data.emoji)}</div>
   <div class="mcq-options">${options}</div>
 </div>`;
 }
@@ -2724,9 +2733,9 @@ function buildChallengeExercise(num) {
 
     let sentence = '';
     parts.forEach((part, i) => {
-        sentence += part;
+        sentence += escapeHtml(part);
         if (i < data.answers.length) {
-            sentence += `<input class="fill-input" data-answer="${data.answers[i]}">`;
+            sentence += `<input class="fill-input" data-answer="${escapeHtml(data.answers[i])}">`;
         }
     });
 
@@ -2736,7 +2745,7 @@ function buildChallengeExercise(num) {
     <div class="ex-num ex-num-challenge">${toArabicNumber(num)}</div>
     <div><div class="ex-title">🏆 التَّحَدِّي الكَبِير</div><div class="ex-instruction">终极挑战</div></div>
   </div>
-  <div class="zh-text show exercise-context-box">${data.zh}</div>
+  <div class="zh-text show exercise-context-box">${escapeHtml(data.zh)}</div>
   <div class="fill-sentence">${sentence}</div>
   <button class="check-btn" onclick="checkFill(this)">✓ تَحَقَّقْ <span class="zh-only">· 检查</span></button>
   <div class="feedback"></div>
@@ -2754,13 +2763,13 @@ function buildMultiStepExercise(num) {
   <div class="ex-q-card">
     <div class="ex-q-top">
       <span class="ex-q-badge">س${qNum}</span>
-      <span class="ex-q-ar">${q.ar}</span>
-      <span class="ex-q-zh zh-text">${q.zh}</span>
+      <span class="ex-q-ar">${escapeHtml(q.ar)}</span>
+      <span class="ex-q-zh zh-text">${escapeHtml(q.zh)}</span>
     </div>
   </div>`;
         questions += `<div class="mcq-options">`;
         q.options.forEach((opt, i) => {
-            questions += `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${opt.ar}</span></div>`;
+            questions += `<div class="mcq-opt" onclick="mcq(this,${opt.correct})"><span class="mcq-letter">${letters[i]}</span><span class="ar-text">${escapeHtml(opt.ar)}</span></div>`;
         });
         questions += `</div>`;
     });
@@ -2768,11 +2777,11 @@ function buildMultiStepExercise(num) {
     return `
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
-    <div class="ex-title">${data.title}</div><div class="ex-instruction">${data.instruction}</div>
+    <div class="ex-title">${escapeHtml(data.title)}</div><div class="ex-instruction">${escapeHtml(data.instruction)}</div>
   </div></div>
   <div class="exercise-story-box">
-    <div class="ar-text">${data.story.ar}</div>
-    <div class="zh-text">${data.story.zh}</div>
+    <div class="ar-text">${escapeHtml(data.story.ar)}</div>
+    <div class="zh-text">${escapeHtml(data.story.zh)}</div>
   </div>
   ${questions}
 </div>`;
@@ -2782,13 +2791,13 @@ function buildGuidedWritingExercise(num) {
     const data = LESSON_DATA.exercises.guidedWriting;
 
     const rows = data.sentences.map(s =>
-        `<div class="fill-sentence">${s.prefix} <input class="fill-input fill-input-wide" placeholder="${s.placeholder}"></div>`
+        `<div class="fill-sentence">${escapeHtml(s.prefix)} <input class="fill-input fill-input-wide" placeholder="${escapeHtml(s.placeholder)}"></div>`
     ).join('\n');
 
     return `
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
-    <div class="ex-title">${data.title}</div><div class="ex-instruction">${data.instruction}</div>
+    <div class="ex-title">${escapeHtml(data.title)}</div><div class="ex-instruction">${escapeHtml(data.instruction)}</div>
   </div></div>
   ${rows}
 </div>`;
@@ -2800,9 +2809,9 @@ function buildSentenceTransformExercise(num) {
     return `
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
-    <div class="ex-title">${data.title}</div><div class="ex-instruction">${data.instruction}</div>
+    <div class="ex-title">${escapeHtml(data.title)}</div><div class="ex-instruction">${escapeHtml(data.instruction)}</div>
   </div></div>
-  <div class="fill-sentence">${data.sentence}</div>
+  <div class="fill-sentence">${escapeHtml(data.sentence)}</div>
   <button class="check-btn" onclick="checkFill(this)">✓ تَحَقَّقْ <span class="zh-only">· 检查</span></button>
   <div class="feedback"></div>
 </div>`;
@@ -2814,7 +2823,7 @@ function buildSpeedChallengeExercise(num) {
     return `
 <div class="exercise">
   <div class="ex-header"><div class="ex-num">${toArabicNumber(num)}</div><div>
-    <div class="ex-title">${data.title}</div><div class="ex-instruction">${data.instruction}</div>
+    <div class="ex-title">${escapeHtml(data.title)}</div><div class="ex-instruction">${escapeHtml(data.instruction)}</div>
   </div></div>
   <div class="speed-controls">
     <button class="btn btn-primary" onclick="startSpeed()">▶ ابْدَأْ <span class="zh-only">· 开始</span></button>
@@ -2884,15 +2893,15 @@ function renderSpeaking() {
     // Level 2: كلمات البناء — اختيار ذكي يمكن من تكوين جمل صحيحة
     const chipIndices = [0, 1, 2, 3, 4, 5, 9, 13, 14];
     const chipWords = chipIndices.map(i =>
-        `<span class="chip" onclick="chipPick(this)">${vocab[i]?.ar || ''}</span>`
+        `<span class="chip" onclick="chipPick(this)">${escapeHtml(vocab[i]?.ar || '')}</span>`
     ).filter(w => w).join('\n    ');
 
     container.innerHTML = `
 <div class="speak-level">
   <div class="speak-level-title">🟢 المُسْتَوَى ١ <span class="speak-badge easy">مُوَجَّه <span class="zh-only">· 引导</span></span></div>
   <div class="speak-level-instruction">اِقْرَأْ بِصَوْت عَالٍ <span class="zh-only">· 朗读</span>：</div>
-  <div class="ar-text speak-level-ar">${level1Text}</div>
-  <div class="zh-text">${level1Zh}</div>
+  <div class="ar-text speak-level-ar">${escapeHtml(level1Text)}</div>
+  <div class="zh-text">${escapeHtml(level1Zh)}</div>
   <button class="btn btn-primary speak-btn" onclick="speakAr('${safeAttr(level1Text)}')">🔊 اِسْتَمِعْ <span class="zh-only">· 听</span></button>
 </div>
 
@@ -3286,15 +3295,18 @@ const SmartFeedback = {
             const correctClean = info.correct.replace(/[\u064B-\u0652\u0670]/g, '').trim();
 
             if (inputClean === wrongClean && expectedClean === correctClean) {
-                return info;
+                return {
+                    ar: escapeHtml(info.ar),
+                    zh: escapeHtml(info.zh)
+                };
             }
         }
 
         // إذا كان الإدخال قريباً جداً (فرق حرف واحد)
         if (this.editDistance(inputClean, expectedClean) === 1) {
             return {
-                ar: `💡 قَرِيب جِدّاً! الإِجَابَة الصَّحِيحَة: <strong>${expected}</strong>`,
-                zh: `💡 很接近！正确答案：<strong>${expected}</strong>`
+                ar: `💡 قَرِيب جِدّاً! الإِجَابَة الصَّحِيحَة: <strong>${escapeHtml(expected)}</strong>`,
+                zh: `💡 很接近！正确答案：<strong>${escapeHtml(expected)}</strong>`
             };
         }
 
