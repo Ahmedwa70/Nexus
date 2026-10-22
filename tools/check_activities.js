@@ -7,7 +7,7 @@
 // الغرض: المدقّق الرسمي (validate_lesson.js) يفحص lesson.js معزولاً،
 // ولا يعرف activity.js إطلاقاً. فدرسٌ ينقصه حقل نشاط يمرّ عنده
 // «ممتازاً»، ثم يفتح النشاط فارغاً أمام الصف.
-// هذه الأداة تسدّ تلك الفجوة: تتحقق أن كل نشاط من الـ22 يجد بياناته،
+// هذه الأداة تسدّ تلك الفجوة: تتحقق أن كل نشاط من الـ25 يجد بياناته،
 // وأن تلك البيانات تحترم قيود واجهته.
 //
 // الخروج: 0 سليم · 1 يوجد نشاط معطّل
@@ -250,6 +250,90 @@ const RULES = {
         bad(id, n, `المريض #${i + 1}: expectedTips مفقودة`);
     });
   },
+
+  // قواعد الأنشطة التي تعتمد حقولاً يقرأها renderer مباشرة.
+  'tap-choice': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!x.question) bad(id, n, `السؤال #${i + 1}: question مفقود`);
+      if (!Array.isArray(x.options) || x.options.length < 2)
+        bad(id, n, `السؤال #${i + 1}: يلزم خياران على الأقل`);
+      if (!Number.isInteger(x.correct) || x.correct < 0 || x.correct >= (x.options || []).length)
+        bad(id, n, `السؤال #${i + 1}: correct خارج نطاق الخيارات`);
+    });
+  },
+
+  'swipe-quiz': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!x.arabic) bad(id, n, `البطاقة #${i + 1}: arabic مفقود`);
+      if (!x.chinese) warn(id, n, `البطاقة #${i + 1}: chinese مفقود`);
+      if (typeof x.correct !== 'boolean') bad(id, n, `البطاقة #${i + 1}: correct ليس boolean`);
+    });
+  },
+
+  'sound-match': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!x.audioText) bad(id, n, `السؤال #${i + 1}: audioText مفقود`);
+      if (!Array.isArray(x.options) || x.options.length < 2)
+        bad(id, n, `السؤال #${i + 1}: يلزم خياران على الأقل`);
+      if (!Number.isInteger(x.correct) || x.correct < 0 || x.correct >= (x.options || []).length)
+        bad(id, n, `السؤال #${i + 1}: correct خارج نطاق الخيارات`);
+    });
+  },
+
+  'mini-maze': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!x.question) bad(id, n, `السؤال #${i + 1}: question مفقود`);
+      if (!Array.isArray(x.options) || x.options.length < 2)
+        bad(id, n, `السؤال #${i + 1}: يلزم خياران على الأقل`);
+      if (!Number.isInteger(x.correct) || x.correct < 0 || x.correct >= (x.options || []).length)
+        bad(id, n, `السؤال #${i + 1}: correct خارج نطاق الخيارات`);
+    });
+  },
+
+  'progressive-story': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!x.speaker) warn(id, n, `السطر #${i + 1}: speaker مفقود`);
+      if (!x.text) bad(id, n, `السطر #${i + 1}: text مفقود`);
+    });
+  },
+
+  'role-dialogue': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!Array.isArray(x.turns) || x.turns.length < 3)
+        bad(id, n, `الحوار #${i + 1}: يلزم 3 أدوار على الأقل`);
+      (x.turns || []).forEach((t, j) => {
+        if (!t.line) bad(id, n, `الحوار #${i + 1} الدور #${j + 1}: line مفقود`);
+        if (!Array.isArray(t.options) || t.options.length < 2)
+          bad(id, n, `الحوار #${i + 1} الدور #${j + 1}: يلزم خياران`);
+        if (!Number.isInteger(t.correct) || t.correct < 0 || t.correct >= (t.options || []).length)
+          bad(id, n, `الحوار #${i + 1} الدور #${j + 1}: correct خارج النطاق`);
+      });
+    });
+  },
+
+  'listen-respond': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!Array.isArray(x.items) || x.items.length < 3)
+        bad(id, n, `الجولة #${i + 1}: يلزم 3 أسئلة على الأقل`);
+      (x.items || []).forEach((t, j) => {
+        if (!t.prompt) bad(id, n, `الجولة #${i + 1} السؤال #${j + 1}: prompt مفقود`);
+        if (!Array.isArray(t.options) || t.options.length < 2)
+          bad(id, n, `الجولة #${i + 1} السؤال #${j + 1}: يلزم خياران`);
+        if (!Number.isInteger(t.correct) || t.correct < 0 || t.correct >= (t.options || []).length)
+          bad(id, n, `الجولة #${i + 1} السؤال #${j + 1}: correct خارج النطاق`);
+      });
+    });
+  },
+
+  'speaking-challenge': (d, id, n) => {
+    d.forEach((x, i) => {
+      if (!Array.isArray(x.items) || !x.items.length)
+        bad(id, n, `الجولة #${i + 1}: items مفقودة`);
+      (x.items || []).forEach((t, j) => {
+        if (!t.prompt) bad(id, n, `الجولة #${i + 1} الجملة #${j + 1}: prompt مفقود`);
+      });
+    });
+  },
 };
 
 // ── الفحص ────────────────────────────────────────────────────────
@@ -285,6 +369,14 @@ CONFIG.forEach(c => {
       if (hollow === value.length)
         bad(c.id, name, `محوّل "${c.type}" في bridge.js أفرغ حقول العناصر كلها — عطب صامت`);
     }
+  }
+
+  if (Array.isArray(value)) {
+    const invalidItems = value.filter(x => !x || typeof x !== 'object' || Array.isArray(x));
+    if (invalidItems.length)
+      bad(c.id, name, `ناتج المحوّل يحتوي ${invalidItems.length} عنصراً ليس كائناً صالحاً`);
+  } else if (rawValue !== undefined) {
+    bad(c.id, name, `ناتج المحوّل ليس مصفوفة (${typeof value})`);
   }
 
   if (rawValue === undefined) {
