@@ -565,7 +565,7 @@ const AutoFocus = {
         if (indicator) indicator.classList.remove('show');
     },
 
-    // إيقاف مؤقت لمدة دقيقتين بعد الإطفاء اليدوي (احترام لرغبة المست��دم)
+    // إيقاف مؤقت لمدة دقيقتين بعد الإطفاء اليدوي (احترام لرغبة المست����دم)
     suppress(durationMs = 120000) {
         this.suppressedUntil = Date.now() + durationMs;
         this.deactivate(true);
@@ -995,7 +995,7 @@ function playAudio(element, text) {
 }
 
 // ===== Speed challenge =====
-// CF-3 FIX: كان IIFE خارج أي try/catch — crash هنا يوقف كامل app.js
+// CF-3 FIX: ك��ن IIFE خارج أي try/catch — crash هنا يوقف كامل app.js
 // الحل: let مع قيمة افتراضية، تُملأ من initSpeedQs() التي تُستدعى من loadLesson
 function initSpeedQs() {
     try {
@@ -2267,14 +2267,7 @@ function renderExercises() {
     const container = document.getElementById('exercisesContainer');
     if (!container) return;
 
-    if (LESSON_DATA.exercisesHTML) {
-        container.innerHTML = LESSON_DATA.exercisesHTML;
-        initDragClassification();
-        initOrderPool();
-        return;
-    }
-
-    container.innerHTML = getExercisesHTML();
+  container.innerHTML = getExercisesHTML();
     // CF-2 FIX: تُستدعى بعد inject لأن .drag-item تُنشأ هنا
     initDragClassification();
     // CF-1 FIX: تُستدعى بعد inject لأن #orderPool تُنشأ هنا
