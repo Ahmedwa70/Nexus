@@ -21,6 +21,12 @@ BACKUP="$SCRIPT_DIR/data/lesson_backup.js"
 SANITIZE="$SCRIPT_DIR/sanitize_lesson.js"
 VALIDATE="$SCRIPT_DIR/validate_lesson.js"
 CROSSCHECK="$SCRIPT_DIR/tools/check_activities.js"
+PUBLISH_TMP="$SCRIPT_DIR/data/.lesson.js.tmp.$$"
+
+cleanup() {
+    rm -f "$CLEAN" "$PUBLISH_TMP"
+}
+trap cleanup EXIT
 
 line() { echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"; }
 
@@ -55,6 +61,16 @@ fi
 
 if [ ! -f "$VALIDATE" ]; then
     echo -e "  ${RED}❌ ملف مفقود: validate_lesson.js${NC}"
+    exit 1
+fi
+
+if [ ! -f "$CROSSCHECK" ]; then
+    echo -e "  ${RED}❌ ملف مفقود: tools/check_activities.js — لا يمكن تجاوز الفحص التقاطعي${NC}"
+    exit 1
+fi
+
+if [ ! -f "$FINAL" ]; then
+    echo -e "  ${RED}❌ الدرس الحالي غير موجود: data/lesson.js${NC}"
     exit 1
 fi
 
@@ -99,42 +115,42 @@ fi
 # ── STEP 3: Cross-check activities ───────────────────────────────
 # المدقّق يفحص lesson.js معزولاً ولا يعرف activity.js. فدرسٌ ينقصه
 # حقل نشاط يمرّ عنده «ممتازاً» ثم يفتح النشاط فارغاً أمام الصف.
-echo -e "  ${BOLD}[3/4]${NC} 🔗 الفحص التقاطعي للأنشطة الـ24..."
+echo -e "  ${BOLD}[3/4]${NC} 🔗 الفحص التقاطعي للأنشطة الـ25..."
 echo ""
 
-if [ -f "$CROSSCHECK" ]; then
-    node "$CROSSCHECK" "$CLEAN"
-    CROSS_EXIT=$?
+node "$CROSSCHECK" "$CLEAN"
+CROSS_EXIT=$?
+echo ""
+if [ $CROSS_EXIT -ne 0 ]; then
+    line
+    echo -e "  ${RED}${BOLD}⛔ توقف — أنشطة لن تعمل بهذا الدرس${NC}"
+    echo -e "  ${YELLOW}→ أضف الحقول الناقصة إلى data/lesson_raw.js ثم أعِد التشغيل${NC}"
     echo ""
-    if [ $CROSS_EXIT -ne 0 ]; then
-        line
-        echo -e "  ${RED}${BOLD}⛔ توقف — أنشطة لن تعمل بهذا الدرس${NC}"
-        echo -e "  ${YELLOW}→ أضف الحقول الناقصة إلى data/lesson_raw.js ثم أعِد التشغيل${NC}"
-        echo ""
-        rm -f "$CLEAN"
-        exit 1
-    fi
-else
-    echo -e "  ${YELLOW}⚠️  tools/check_activities.js غير موجود — تُخطّى الفحص التقاطعي${NC}"
-    echo ""
+    exit 1
 fi
 
 # ── STEP 4: Publish ───────────────────────────────────────────────
 echo -e "  ${BOLD}[4/4]${NC} 📤 نشر الدرس..."
 echo ""
 
-if [ -f "$FINAL" ]; then
-    cp "$FINAL" "$BACKUP"
-    echo -e "  💾 نسخة احتياطية: data/lesson_backup.js"
+if ! cp "$FINAL" "$BACKUP"; then
+    line
+    echo -e "  ${RED}❌ فشل إنشاء النسخة الاحتياطية — لم يتغير الدرس الحالي${NC}"
+    echo ""
+    exit 1
+fi
+echo -e "  💾 نسخة احتياطية: data/lesson_backup.js"
+
+if ! cp "$CLEAN" "$PUBLISH_TMP"; then
+    line
+    echo -e "  ${RED}❌ فشل تجهيز الملف المؤهل — لم يتغير الدرس الحالي${NC}"
+    echo ""
+    exit 1
 fi
 
-cp "$CLEAN" "$FINAL"
-COPY_EXIT=$?
-rm -f "$CLEAN"
-
-if [ $COPY_EXIT -ne 0 ]; then
+if ! mv -f "$PUBLISH_TMP" "$FINAL"; then
     line
-    echo -e "  ${RED}❌ فشل نسخ الملف — تحقق من صلاحيات المجلد${NC}"
+    echo -e "  ${RED}❌ فشل تثبيت الملف — بقي الدرس الحالي دون تغيير${NC}"
     echo ""
     exit 1
 fi
