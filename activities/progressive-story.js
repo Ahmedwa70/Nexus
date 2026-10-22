@@ -1,5 +1,10 @@
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   const dialogue = data;
   let idx = 0;
   ac.innerHTML = `
@@ -21,7 +26,7 @@ function render(runtime, data) {
     const d = dialogue[idx];
     const p = document.createElement('div');
     p.className = 'story-paragraph';
-    p.innerHTML = `<strong style="color:var(--accent-purple)">${d.speaker}:</strong> <span class="ar-text" style="display:inline;font-size:calc(var(--ar-size)*0.85)">${d.text}</span><span class="zh-text">${d.chinese}</span>`;
+    p.innerHTML = `<strong style="color:var(--accent-purple)">${escapeHtml(d.speaker)}:</strong> <span class="ar-text" style="display:inline;font-size:calc(var(--ar-size)*0.85)">${escapeHtml(d.text)}</span><span class="zh-text">${escapeHtml(d.chinese)}</span>`;
     content.appendChild(p);
     if (runtime.state.sound) runtime.speak(d.text);
     idx++;

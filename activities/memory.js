@@ -6,6 +6,11 @@ function render(runtime, data) {
   const allCards = [...pairs.map((p, i) => ({ ...p, id: i, type: 'emoji' })), ...pairs.map((p, i) => ({ ...p, id: i, type: 'word' }))];
   const shuffled = allCards.sort(() => Math.random() - 0.5);
   memState = { cards: shuffled, flipped: [], matched: new Set(), moves: 0, pairs: pairs.length };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
 
   ac.innerHTML = `
     <div class="activity-header">
@@ -28,8 +33,8 @@ function render(runtime, data) {
         <div class="card-face card-front">🫙</div>
         <div class="card-face card-back">
           ${card.type === 'emoji'
-            ? `<span style="font-size:30px">${card.emoji}</span>`
-            : `<span class="ar-small">${card.arabic}</span><span class="zh-small">${card.chinese}</span>`}
+            ? `<span style="font-size:30px">${escapeHtml(card.emoji)}</span>`
+            : `<span class="ar-small">${escapeHtml(card.arabic)}</span><span class="zh-small">${escapeHtml(card.chinese)}</span>`}
         </div>
       </div>
     `).join('');

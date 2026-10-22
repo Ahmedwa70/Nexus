@@ -1,5 +1,10 @@
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   const pairs = data;
   ac.innerHTML = `
     <div class="activity-header">
@@ -18,7 +23,7 @@ function render(runtime, data) {
   ladder.innerHTML = pairs.map((p, i) => `
     <div class="ladder-step" id="ls-${i}">
       <span class="step-num">${i + 1}</span>
-      <span class="step-past ar-text" style="font-size:calc(var(--ar-size)*0.8)">${p.past}</span>
+      <span class="step-past ar-text" style="font-size:calc(var(--ar-size)*0.8)">${escapeHtml(p.past)}</span>
       <span class="step-arrow">→</span>
       <input class="step-input" id="li-${i}" placeholder="المضارع..." autocomplete="off" dir="rtl" />
     </div>

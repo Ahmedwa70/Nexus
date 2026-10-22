@@ -4,6 +4,11 @@ function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   const vocab = data.slice(0, 8);
   qrState = { vocab, round: 0, score: 0, current: null };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">🏃 ردود فعل سريعة</div>
@@ -25,13 +30,14 @@ function render(runtime, data) {
     qrState.current = correct;
     document.getElementById('qr-play').style.display = 'none';
     document.getElementById('qr-grid').innerHTML = shuffled.map((w, i) => `
-      <div class="reaction-cell" data-arabic="${w.arabic}" onclick="checkQR(this, '${w.arabic}')">
-        <div class="ar-text" style="font-size:calc(var(--ar-size)*0.7)">${w.arabic}</div>
+      <div class="reaction-cell" data-arabic="${escapeHtml(w.arabic)}" onclick="checkQR(this)">
+        <div class="ar-text" style="font-size:calc(var(--ar-size)*0.7)">${escapeHtml(w.arabic)}</div>
       </div>
     `).join('');
     setTimeout(() => runtime.speak(correct.arabic), 300);
   }
   function checkQR(el, chosen) {
+    if (chosen === undefined) chosen = el.dataset.arabic;
     const correct = qrState.current.arabic;
     const cells = document.querySelectorAll('.reaction-cell');
     cells.forEach(c => {

@@ -27,6 +27,12 @@ function render(runtime, data) {
     </div>
   `;
 
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function fmtTime() {
     var t = wcState.timeBase++;
     var h = Math.floor(t / 60) % 24;
@@ -46,10 +52,10 @@ function render(runtime, data) {
 
     var avatarHTML = '<div class="msg-avatar">' + (isStudent ? '🧑‍🎓' : '👦') + '</div>';
     var metaHTML = '<span class="msg-time">' + fmtTime() + (isStudent ? ' ✓✓' : '') + '</span>';
-    var zhHTML = zh ? '<div class="msg-text-zh zh-text">' + zh + '</div>' : '';
+    var zhHTML = zh ? '<div class="msg-text-zh zh-text">' + escapeHtml(zh) + '</div>' : '';
 
     var bubbleHTML = '<div class="msg-bubble">' +
-      '<div class="msg-text-ar">' + text + '</div>' +
+      '<div class="msg-text-ar">' + escapeHtml(text) + '</div>' +
       zhHTML + metaHTML + '</div>';
 
     row.innerHTML = avatarHTML + bubbleHTML;
@@ -90,7 +96,7 @@ function render(runtime, data) {
     setComposerState('choose');
     choicesEl.style.display = 'flex';
     choicesEl.innerHTML = step.choices.map(function(c, i) {
-      return '<button class="chat-chip" onclick="pickWcChoice(' + i + ',' + step.correctIndex + ')">' + c + '</button>';
+      return '<button class="chat-chip" onclick="pickWcChoice(' + i + ',' + step.correctIndex + ')">' + escapeHtml(c) + '</button>';
     }).join('');
   }
 

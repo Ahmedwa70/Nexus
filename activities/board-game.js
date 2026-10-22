@@ -58,16 +58,19 @@ function render(runtime, data) {
   function showBGQuestion(sq) {
     const el = document.getElementById('bg-question');
     el.style.display = 'block';
+    bgState.currentAnswer = sq.answer;
     el.innerHTML = `
-      <div class="ar-text" style="font-size:calc(var(--ar-size)*0.8);direction:rtl;margin-bottom:12px">${sq.question}</div>
+      <div class="ar-text" id="bg-qtext" style="font-size:calc(var(--ar-size)*0.8);direction:rtl;margin-bottom:12px"></div>
       <input class="doctor-textarea" id="bg-answer" style="min-height:44px" placeholder="الجواب..." dir="rtl" />
       <div style="text-align:center;margin-top:10px">
-        <button class="btn btn-primary" onclick="checkBGAnswer('${sq.answer}')">✅ تحقق</button>
+        <button class="btn btn-primary" onclick="checkBGAnswer()">✅ تحقق</button>
       </div>
       <div id="bg-feedback" style="text-align:center;margin-top:8px"></div>
     `;
+    document.getElementById('bg-qtext').textContent = sq.question;
   }
   function checkBGAnswer(correct) {
+    correct = correct !== undefined ? correct : bgState.currentAnswer;
     const val = document.getElementById('bg-answer').value.trim();
     const strip = s => s.replace(/[\u064B-\u065F]/g, '');
     const valNorm = strip(val);

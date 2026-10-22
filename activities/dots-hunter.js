@@ -3,6 +3,11 @@ let dhState = {};
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   dhState = { words: [...data], idx: 0, score: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">💧 صائد النقاط</div>
@@ -24,7 +29,7 @@ function render(runtime, data) {
     if (dhState.idx >= dhState.words.length) { runtime.complete(Math.round(dhState.score / dhState.words.length * 5)); return; }
     const w = dhState.words[dhState.idx];
     document.getElementById('dh-prog').style.width = (dhState.idx / dhState.words.length * 100) + '%';
-    document.getElementById('dh-word').innerHTML = `${w.base}<span style="color:var(--accent-amber)">___</span>`;
+    document.getElementById('dh-word').innerHTML = `${escapeHtml(w.base)}<span style="color:var(--accent-amber)">___</span>`;
     document.getElementById('dh-feedback').textContent = '';
   }
   function checkDH(letter) {

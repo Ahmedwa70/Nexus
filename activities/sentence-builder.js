@@ -68,7 +68,7 @@ function render(runtime, data) {
         <span style="color:var(--text-secondary);font-size:14px;font-family:'Noto Sans SC'">点击单词放在这里...</span>
       </div>
       <div class="word-bank" id="sb-bank"></div>
-      <div style="display:flex;gap:10px;justify-content:center;margin-top:16px">
+      <div class="sb-controls" style="display:flex;gap:10px;justify-content:center;margin-top:16px">
         <button class="btn btn-outline" onclick="clearSB()">🗑️ مسح</button>
         <button class="btn btn-primary" onclick="checkSB()">✅ تحقق</button>
       </div>

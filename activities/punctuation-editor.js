@@ -3,6 +3,11 @@ let peState = {};
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   peState = { sentences: [...data], idx: 0, score: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">✏️ المحرر الصحفي</div>
@@ -22,7 +27,7 @@ function render(runtime, data) {
     if (peState.idx >= peState.sentences.length) { runtime.complete(Math.round(peState.score / peState.sentences.length * 5)); return; }
     const s = peState.sentences[peState.idx];
     document.getElementById('pe-prog').style.width = (peState.idx / peState.sentences.length * 100) + '%';
-    document.getElementById('pe-sentence').innerHTML = `${s.text}<span class="punct-blank"></span>`;
+    document.getElementById('pe-sentence').innerHTML = `${escapeHtml(s.text)}<span class="punct-blank"></span>`;
     document.getElementById('pe-feedback').textContent = '';
   }
   function checkPE(mark) {

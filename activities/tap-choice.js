@@ -3,6 +3,11 @@ let tqState = {};
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   tqState = { questions: [...data], idx: 0, score: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">👆 اختيار سريع</div>
@@ -22,9 +27,11 @@ function render(runtime, data) {
     document.getElementById('tq-prog').style.width = (idx / questions.length * 100) + '%';
     document.getElementById('tap-q').textContent = q.question;
     document.getElementById('tap-opts').innerHTML = q.options.map((o, i) => `
-      <div class="tap-option" onclick="checkTap(${i})">${o}</div>
+      <div class="tap-option" onclick="checkTap(${i})">${escapeHtml(o)}</div>
     `).join('');
-    if (runtime.state.sound) runtime.speak(q.question);
+    // النطق التلقائي يُعاد تفعيله بعد السؤال الأول — عند فتح النشاط يبقى صامتاً
+    if (tqState.opened && runtime.state.sound) runtime.speak(q.question);
+    tqState.opened = true;
   }
   function checkTap(chosen) {
     const q = tqState.questions[tqState.idx];

@@ -4,6 +4,11 @@ function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   const sentences = data.map(s => ({ ...s, correct: s.correct === true }));
   swState = { items: sentences, idx: 0, score: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">↔️ تمرير الصح/الخطأ</div>
@@ -26,8 +31,8 @@ function render(runtime, data) {
     const item = swState.items[swState.idx];
     container.innerHTML = `
       <div class="swipe-card" id="sw-card">
-        <div class="ar-text" style="text-align:center">${item.arabic}</div>
-        <div class="zh-text" style="text-align:center">${item.chinese}</div>
+        <div class="ar-text" style="text-align:center">${escapeHtml(item.arabic)}</div>
+        <div class="zh-text" style="text-align:center">${escapeHtml(item.chinese)}</div>
       </div>
     `;
     const card = document.getElementById('sw-card');

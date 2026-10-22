@@ -3,6 +3,11 @@ let hrState = {};
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   hrState = { items: [...data], idx: 0, hintsShown: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">🔦 الكشف المخفي</div>
@@ -38,7 +43,7 @@ function render(runtime, data) {
     if (hrState.hintsShown >= item.hints.length) return;
     const hint = item.hints[hrState.hintsShown++];
     const hintsEl = document.getElementById('hr-hints');
-    hintsEl.innerHTML += `<span class="hint-chip">💡 ${hint}</span>`;
+    hintsEl.innerHTML += `<span class="hint-chip">💡 ${escapeHtml(hint)}</span>`;
   }
   function revealHR() {
     const item = hrState.items[hrState.idx];

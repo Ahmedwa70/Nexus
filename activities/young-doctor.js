@@ -3,6 +3,11 @@ let ydState = {};
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   ydState = { patients: [...data], idx: 0, score: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">👨‍⚕️ الطبيب الصغير</div>
@@ -22,8 +27,8 @@ function render(runtime, data) {
     if (ydState.idx >= ydState.patients.length) { runtime.complete(5); return; }
     const p = ydState.patients[ydState.idx];
     document.getElementById('yd-patient').innerHTML = `
-      <div class="patient-name">👤 ${p.name} (${p.age} سنوات)</div>
-      <div class="patient-problem">🔍 ${p.problems}</div>
+      <div class="patient-name">👤 ${escapeHtml(p.name)} (${p.age} سنوات)</div>
+      <div class="patient-problem">🔍 ${escapeHtml(p.problems)}</div>
     `;
     document.getElementById('yd-tips').value = '';
     document.getElementById('yd-feedback').textContent = '';
@@ -34,7 +39,7 @@ function render(runtime, data) {
     const lines = text.split('\n').filter(l => l.trim().length > 3);
     const score = Math.min(3, lines.length);
     if (score >= 2) {
-      document.getElementById('yd-feedback').innerHTML = `<span style="color:var(--accent-emerald)">✅ ممتاز! ${score} نصائح</span><br>${p.expectedTips.map(t=>`<span class="hint-chip">${t}</span>`).join(' ')}`;
+      document.getElementById('yd-feedback').innerHTML = `<span style="color:var(--accent-emerald)">✅ ممتاز! ${score} نصائح</span><br>${p.expectedTips.map(t=>`<span class="hint-chip">${escapeHtml(t)}</span>`).join(' ')}`;
       runtime.reward(1 + score / 5);
       ydState.score++;
     } else {

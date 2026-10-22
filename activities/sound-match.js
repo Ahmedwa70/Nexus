@@ -3,6 +3,11 @@ let smState = {};
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   smState = { questions: [...data], idx: 0, score: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">🔊 تطابق الصوت</div>
@@ -21,11 +26,13 @@ function render(runtime, data) {
     const q = questions[idx];
     document.getElementById('sm-opts').innerHTML = q.options.map((o, i) => `
       <div class="sound-option" onclick="checkSound(${i})">
-        <span class="option-emoji">${o.split(' ')[0]}</span>
-        ${o.split(' ').slice(1).join(' ')}
+        <span class="option-emoji">${escapeHtml(o.split(' ')[0])}</span>
+        ${escapeHtml(o.split(' ').slice(1).join(' '))}
       </div>
     `).join('');
-    setTimeout(() => playCurrentSound(), 400);
+    // التشغيل التلقائي يستأنف بعد السؤال الأول — عند فتح النشاط يبقى صامتاً
+    if (smState.opened) setTimeout(() => playCurrentSound(), 400);
+    smState.opened = true;
   }
   function playCurrentSound() {
     const q = smState.questions[smState.idx];

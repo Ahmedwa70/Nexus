@@ -6,6 +6,11 @@ function render(runtime, data) {
     [0,0,0,1,0],[1,1,0,1,0],[0,0,0,0,0],[0,1,1,1,0],[0,0,0,1,2]
   ];
   mazeState = { grid, player: {r:0,c:0}, goal: {r:4,c:4}, steps: 0, score: 0, questionQueue: [...data], answered: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">🧭 متاهة صغيرة</div>
@@ -53,8 +58,8 @@ function render(runtime, data) {
     const qEl = document.getElementById('maze-question');
     qEl.style.display = 'block';
     qEl.innerHTML = `
-      <div class="ar-text" style="font-size:calc(var(--ar-size)*0.8);margin-bottom:12px;direction:rtl">${q.question}</div>
-      <div class="tap-options" style="grid-template-columns:repeat(2,1fr)">${q.options.map((o,i)=>`<div class="tap-option" onclick="answerMaze(${i},${q.correct},${nr},${nc})">${o}</div>`).join('')}</div>
+      <div class="ar-text" style="font-size:calc(var(--ar-size)*0.8);margin-bottom:12px;direction:rtl">${escapeHtml(q.question)}</div>
+      <div class="tap-options" style="grid-template-columns:repeat(2,1fr)">${q.options.map((o,i)=>`<div class="tap-option" onclick="answerMaze(${i},${q.correct},${nr},${nc})">${escapeHtml(o)}</div>`).join('')}</div>
     `;
   }
   function answerMaze(chosen, correct, nr, nc) {

@@ -1,5 +1,10 @@
 function render(runtime, data) {
   const ac = document.getElementById('activity-container');
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   const pairs = data;
   let idx = 0, score = 0;
   ac.innerHTML = `
@@ -17,8 +22,8 @@ function render(runtime, data) {
     card.innerHTML = `
       <div class="zh-text" style="text-align:center;margin-bottom:14px;font-size:15px">点击不同的词 / انقر على الكلمة المختلفة</div>
       <div class="spot-pair">
-        <div class="spot-sentence" onclick="spotClick(0)">${p.sentenceA}</div>
-        <div class="spot-sentence" onclick="spotClick(1)">${p.sentenceB}</div>
+        <div class="spot-sentence" onclick="spotClick(0)">${escapeHtml(p.sentenceA)}</div>
+        <div class="spot-sentence" onclick="spotClick(1)">${escapeHtml(p.sentenceB)}</div>
       </div>
       <div id="sd-feedback" style="text-align:center;margin-top:12px;font-size:18px;direction:rtl"></div>
       <div style="text-align:center;margin-top:12px">

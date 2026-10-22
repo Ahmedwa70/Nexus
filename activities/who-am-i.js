@@ -33,6 +33,11 @@ function render(runtime, data) {
   const ac = document.getElementById('activity-container');
   const items = data;
   wiState = { items, idx: 0, hintIdx: 0, score: 0 };
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
   ac.innerHTML = `
     <div class="activity-header">
       <div class="activity-heading">🎭 مَن أنا؟</div>
@@ -54,7 +59,7 @@ function render(runtime, data) {
     // مدخل الدرس مولَّد آلياً، فنحتاط لغياب hints بدل الانهيار أمام الصف
     const hints = wiState.items[wiState.idx].hints;
     const first = Array.isArray(hints) && hints.length ? hints[0] : '—';
-    document.getElementById('wi-hints').innerHTML = `<div class="hint-chip">💡 ${first}</div>`;
+    document.getElementById('wi-hints').innerHTML = `<div class="hint-chip">💡 ${escapeHtml(first)}</div>`;
     document.getElementById('wi-input').value = '';
     document.getElementById('wi-feedback').textContent = '';
   }
@@ -63,7 +68,7 @@ function render(runtime, data) {
     if (!Array.isArray(item.hints)) return;
     if (wiState.hintIdx < item.hints.length - 1) {
       wiState.hintIdx++;
-      document.getElementById('wi-hints').innerHTML += `<div class="hint-chip">💡 ${item.hints[wiState.hintIdx]}</div>`;
+      document.getElementById('wi-hints').innerHTML += `<div class="hint-chip">💡 ${escapeHtml(item.hints[wiState.hintIdx])}</div>`;
     }
   }
   function checkWI() {
